@@ -9,6 +9,8 @@ User Roles
 Customers can:
 •	Register 
 •	Login 
+•	Login with Google (OAuth) 
+•	Register with Google (OAuth) 
 •	Forgot Password 
 •	Manage Profile 
 •	Browse destinations 
@@ -184,6 +186,7 @@ System Modules
 Features :
 •	Register 
 •	Login 
+•	Login / Register with Google (OAuth via Better Auth) 
 •	Logout 
 •	Forgot Password 
 •	Reset Password 
@@ -406,7 +409,7 @@ Database
 •mongodb
 
 Authentication
-•	Better Auth 
+•	Better Auth (with Google OAuth) 
 
 Maps
 •	Google Maps API 
