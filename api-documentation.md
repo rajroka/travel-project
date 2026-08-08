@@ -39,7 +39,8 @@ export const authClient = createAuthClient({ baseURL: "http://localhost:3000" })
 
 ## 1. Authentication
 
-> All `/api/auth/*` routes below are handled by Better Auth unless noted otherwise.
+> All `/api/auth/*` routes are handled by Better Auth unless noted as custom.
+> **Custom routes** (not part of Better Auth): `change-password`, `profile`, `refresh-token`.
 
 ---
 
@@ -296,7 +297,7 @@ List featured destinations (up to 8).
 
 ---
 
-### GET /api/destinations/:id
+### GET /api/destinations/:slug
 Get single destination by ID or slug.
 
 **Auth required:** No  
@@ -305,7 +306,7 @@ Get single destination by ID or slug.
 
 ---
 
-### PATCH /api/destinations/:id
+### PATCH /api/destinations/:slug
 Update a destination.
 
 **Auth required:** `staff` · `admin`  
@@ -314,7 +315,7 @@ Update a destination.
 
 ---
 
-### DELETE /api/destinations/:id
+### DELETE /api/destinations/:slug
 Soft-delete a destination (sets `isActive: false`).
 
 **Auth required:** `staff` · `admin`  
@@ -322,7 +323,7 @@ Soft-delete a destination (sets `isActive: false`).
 
 ---
 
-### POST /api/destinations/:id/images
+### POST /api/destinations/:slug/images
 Add images to a destination.
 
 **Auth required:** `staff` · `admin`
@@ -336,7 +337,7 @@ Add images to a destination.
 
 ---
 
-### DELETE /api/destinations/:id/images
+### DELETE /api/destinations/:slug/images
 Remove an image URL from a destination.
 
 **Auth required:** `staff` · `admin`
@@ -415,7 +416,7 @@ Compare 2–4 packages side by side.
 
 ---
 
-### GET /api/packages/:id
+### GET /api/packages/:slug
 Get single package by ID or slug.
 
 **Auth required:** No  
@@ -423,7 +424,7 @@ Get single package by ID or slug.
 
 ---
 
-### PATCH /api/packages/:id
+### PATCH /api/packages/:slug
 Update a package.
 
 **Auth required:** `staff` · `admin`  
@@ -432,7 +433,7 @@ Update a package.
 
 ---
 
-### DELETE /api/packages/:id
+### DELETE /api/packages/:slug
 Soft-delete a package.
 
 **Auth required:** `staff` · `admin`  
@@ -440,7 +441,7 @@ Soft-delete a package.
 
 ---
 
-### PATCH /api/packages/:id/activate
+### PATCH /api/packages/:slug/activate
 Activate or deactivate a package.
 
 **Auth required:** `staff` · `admin`
@@ -454,7 +455,7 @@ Activate or deactivate a package.
 
 ---
 
-### POST /api/packages/:id/images
+### POST /api/packages/:slug/images
 Add images to a package.
 
 **Auth required:** `staff` · `admin`
@@ -466,7 +467,7 @@ Add images to a package.
 
 ---
 
-### DELETE /api/packages/:id/images
+### DELETE /api/packages/:slug/images
 Remove an image from a package.
 
 **Auth required:** `staff` · `admin`
@@ -1662,35 +1663,41 @@ All `422` responses include an `errors` object with per-field messages:
 
 ## 19. Authentication Flow
 
-### Email + Password (Better Auth)
+### Email + Password (Better Auth) — Browser
 ```
-1. authClient.signUp.email()    →  POST /api/auth/sign-up/email  →  session cookie set
-2. authClient.signIn.email()    →  POST /api/auth/sign-in/email  →  session cookie set
-3. All protected requests       →  cookie sent automatically by browser
-4. authClient.signOut()         →  POST /api/auth/sign-out       →  cookie cleared
+1. authClient.signUp.email({ name, email, password })
+   →  POST /api/auth/sign-up/email  →  session cookie set automatically
+2. authClient.signIn.email({ email, password })
+   →  POST /api/auth/sign-in/email  →  session cookie set automatically
+3. All protected requests            →  cookie sent automatically by browser
+4. authClient.signOut()
+   →  POST /api/auth/sign-out       →  cookie cleared
 ```
 
-### Google OAuth (Better Auth)
+### Google OAuth (Better Auth) — Browser
 ```
 1. authClient.signIn.social({ provider: "google" })
    →  GET /api/auth/sign-in/social?provider=google
    →  Redirect to Google consent screen
    →  User approves
-   →  GET /api/auth/callback/google  (Better Auth handles this)
-   →  Session cookie set, user created/found in DB
+   →  GET /api/auth/callback/google  (handled automatically by Better Auth)
+   →  Session cookie set, user created or found in DB
    →  Redirect to callbackURL (default: /)
 ```
 
-### API Clients (Bearer Token)
+### API Clients / Mobile (Bearer Token + Refresh Token)
 ```
-1. POST /api/auth/sign-in/email         →  returns { token }
-2. All requests                         →  Authorization: Bearer <token>
-3. Token stored client-side (localStorage / secure storage)
+1. POST /api/auth/sign-in/email       →  returns { token } + sets refreshToken cookie
+2. All requests                        →  Authorization: Bearer <token>
+3. Token expired?  →  POST /api/auth/refresh-token  →  returns new { accessToken }
+4. Token stored client-side (localStorage / secure storage)
 ```
 
-**Session lifetime** (configurable via `better-auth.ts`):
-- Session cookie — 7 days, refreshed if older than 1 day
+**Session lifetime** (configurable via `better-auth.ts` and `.env.local`):
+- Better Auth session cookie — 7 days, auto-refreshed if older than 1 day
 - Cookie cache — 5 minutes (reduces DB lookups)
+- JWT access token (API clients) — 7 days (JWT_EXPIRES_IN)
+- JWT refresh token cookie — 30 days (JWT_REFRESH_EXPIRES_IN)
 
 ---
 

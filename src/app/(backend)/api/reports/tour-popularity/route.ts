@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db/connection";
 import { TourPackage } from "@/lib/db/models/TourPackage";
 import { Booking } from "@/lib/db/models/Booking";
-import { Review } from "@/lib/db/models/Review";
 import { requireRole } from "@/lib/auth/session";
 
 // GET /api/reports/tour-popularity

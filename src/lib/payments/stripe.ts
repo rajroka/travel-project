@@ -3,7 +3,7 @@ import Stripe from "stripe";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
 export interface StripePaymentIntentParams {
-  amount: number; // in cents (USD * 100)
+  amount: number; // in USD (dollars) — will be converted to cents internally
   currency?: string;
   bookingId: string;
   userId: string;
@@ -14,7 +14,7 @@ export async function createPaymentIntent(
   params: StripePaymentIntentParams
 ): Promise<Stripe.PaymentIntent> {
   return stripe.paymentIntents.create({
-    amount: Math.round(params.amount * 100), // convert to cents
+    amount: Math.round(params.amount * 100), // Stripe requires cents: $450 → 45000
     currency: params.currency || "usd",
     metadata: {
       bookingId: params.bookingId,
@@ -33,7 +33,7 @@ export async function retrievePaymentIntent(
 
 export async function createRefund(
   paymentIntentId: string,
-  amount?: number
+  amount?: number // in USD (dollars) — converted to cents internally
 ): Promise<Stripe.Refund> {
   return stripe.refunds.create({
     payment_intent: paymentIntentId,

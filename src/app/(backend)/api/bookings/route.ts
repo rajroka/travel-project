@@ -5,7 +5,7 @@ import { BookingDetail } from "@/lib/db/models/BookingDetail";
 import { TourPackage } from "@/lib/db/models/TourPackage";
 import { Notification } from "@/lib/db/models/Notification";
 import { User } from "@/lib/db/models/User";
-import { requireSession, requireRole } from "@/lib/auth/session";
+import { requireSession } from "@/lib/auth/session";
 import { createBookingSchema, bookingQuerySchema } from "@/lib/validations/booking";
 import { generateBookingNumber } from "@/lib/auth/auth";
 import { paginate, paginationMeta } from "@/lib/utils/helpers";
@@ -36,6 +36,7 @@ export async function GET(req: NextRequest) {
 
     if (status) filter.status = status;
     if (paymentStatus) filter.paymentStatus = paymentStatus;
+    if (search) filter.bookingNumber = { $regex: search, $options: "i" };
     if (startDate || endDate) {
       filter.travelDate = {};
       if (startDate) (filter.travelDate as Record<string, Date>).$gte = new Date(startDate);

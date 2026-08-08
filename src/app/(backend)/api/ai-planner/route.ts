@@ -111,12 +111,18 @@ export async function POST(req: NextRequest) {
     const isSave = body.save === true;
     const planName = body.planName as string | undefined;
 
+    // Validate the AI-returned package IDs against the actual DB
+    // The AI may hallucinate IDs or return non-existent ones
+    const validPackageIds = generatedPlan.recommendedPackageIds.filter((id) =>
+      packagesForAI.some((p) => p.id === id)
+    );
+
     const plan = await AITripPlan.create({
       user: session.userId,
       input: { destination, days, budget, interests, numberOfTravelers },
       generatedPlan: {
         ...generatedPlan,
-        recommendedPackages: generatedPlan.recommendedPackageIds,
+        recommendedPackages: validPackageIds,
       },
       isSaved: isSave,
       planName,

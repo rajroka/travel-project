@@ -5,8 +5,8 @@ import { Payment } from "@/lib/db/models/Payment";
 import { Favorite } from "@/lib/db/models/Favorite";
 import { AITripPlan } from "@/lib/db/models/AITripPlan";
 import { Notification } from "@/lib/db/models/Notification";
-import { Invoice } from "@/lib/db/models/Invoice";
 import { requireSession } from "@/lib/auth/session";
+import mongoose from "mongoose";
 
 // GET /api/dashboard/customer
 export async function GET(req: NextRequest) {
@@ -44,9 +44,9 @@ export async function GET(req: NextRequest) {
         .populate("package", "title coverImage price duration")
         .lean(),
 
-      // Booking status counts
+      // Booking status counts — must use ObjectId in aggregation pipeline
       Booking.aggregate([
-        { $match: { user: { $eq: session.userId } } },
+        { $match: { user: new mongoose.Types.ObjectId(session.userId) } },
         { $group: { _id: "$status", count: { $sum: 1 } } },
       ]),
 

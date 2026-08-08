@@ -7,27 +7,11 @@ import { Notification } from "@/lib/db/models/Notification";
 import { User } from "@/lib/db/models/User";
 import { requireSession } from "@/lib/auth/session";
 import { initiatePaymentSchema } from "@/lib/validations/payment";
+import { createPayPalOrder, capturePayPalOrder } from "@/lib/payments/paypal";
 import { generateInvoiceNumber } from "@/lib/auth/auth";
 import { sendMail, paymentReceiptTemplate } from "@/lib/email/mailer";
-import axios from "axios";
 
-const PAYPAL_BASE_URL = process.env.PAYPAL_BASE_URL ?? "https://api-m.sandbox.paypal.com";
-const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID ?? "";
-const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET ?? "";
-
-async function getPayPalAccessToken(): Promise<string> {
-  const res = await axios.post(
-    `${PAYPAL_BASE_URL}/v1/oauth2/token`,
-    "grant_type=client_credentials",
-    {
-      auth: { username: PAYPAL_CLIENT_ID, password: PAYPAL_CLIENT_SECRET },
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    }
-  );
-  return res.data.access_token as string;
-}
-
-// POST /api/payments/paypal â€” create PayPal order
+// POST /api/payments/paypal — create PayPal order
 export async function POST(req: NextRequest) {
   try {
     const session = await requireSession(req);
@@ -52,35 +36,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 });
     }
 
-    const accessToken = await getPayPalAccessToken();
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
-    const orderRes = await axios.post(
-      `${PAYPAL_BASE_URL}/v2/checkout/orders`,
-      {
-        intent: "CAPTURE",
-        purchase_units: [
-          {
-            reference_id: booking.bookingNumber,
-            amount: { currency_code: "USD", value: amount.toFixed(2) },
-          },
-        ],
-        application_context: {
-          return_url: `${appUrl}/payment/paypal/verify?bookingId=${bookingId}`,
-          cancel_url: `${appUrl}/payment/cancel`,
-        },
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    const orderId: string = orderRes.data.id;
-    const approvalUrl: string =
-      orderRes.data.links.find((l: { rel: string }) => l.rel === "approve")?.href ?? "";
+    const { orderId, approvalUrl } = await createPayPalOrder({
+      amount,
+      bookingNumber: booking.bookingNumber,
+      returnUrl: `${appUrl}/payment/paypal/verify?bookingId=${bookingId}`,
+      cancelUrl: `${appUrl}/payment/cancel`,
+    });
 
     const payment = await Payment.create({
       booking: bookingId,
@@ -108,7 +71,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// PUT /api/payments/paypal â€” capture PayPal order after approval
+// PUT /api/payments/paypal — capture PayPal order after user approves
 export async function PUT(req: NextRequest) {
   try {
     await connectDB();
@@ -121,21 +84,16 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const accessToken = await getPayPalAccessToken();
-    const captureRes = await axios.post(
-      `${PAYPAL_BASE_URL}/v2/checkout/orders/${orderId}/capture`,
-      {},
-      { headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" } }
-    );
+    const captureData = await capturePayPalOrder(orderId);
 
-    if (captureRes.data.status !== "COMPLETED") {
-      await Payment.findByIdAndUpdate(paymentId, { paymentStatus: "failed" });
+    if (captureData.status !== "COMPLETED") {
+      await Payment.findByIdAndUpdate(paymentId, { paymentStatus: "failed", gatewayResponse: captureData });
       return NextResponse.json({ success: false, message: "PayPal capture failed" }, { status: 400 });
     }
 
     const payment = await Payment.findByIdAndUpdate(
       paymentId,
-      { paymentStatus: "paid", paymentDate: new Date(), gatewayResponse: captureRes.data },
+      { paymentStatus: "paid", paymentDate: new Date(), gatewayResponse: captureData },
       { new: true }
     );
     if (!payment) {

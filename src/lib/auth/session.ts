@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyAccessToken, JwtPayload } from "./auth";
+import { verifyAccessToken } from "./auth";
 import { auth } from "./better-auth";
-import { headers } from "next/headers";
 
 // ─── Unified session type ─────────────────────────────────────────────────────
 
