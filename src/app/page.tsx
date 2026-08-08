@@ -1,32 +1,21 @@
 import Navbar from "@/components/Navbar";
-import Sidebar from "@/components/Sidebar";
-import Hero from "@/components/Hero";
-import Itinerary from "@/components/Itinerary";
-import RightSidebar from "@/components/Rightsidebar";
-import FoodSection from "@/components/FoodSection";
+import Hero from "@/components/home/Hero";
 import Footer from "@/components/Footer";
-import MapCard from "@/components/MapCard";
+import FeaturedDestinations from "@/components/home/FeaturedDestinations";
+import PopularPackages from "@/components/home/PopularPackages";
+import AIPlanner from "@/components/home/AIPlanner";
+
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#F8FAFC]">
+    <main className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <div className="max-w-[1500px] mx-auto flex flex-col lg:flex-row gap-8 px-8 py-8">
-        {/* Left */}
-        <Sidebar />
-{/* Center */}
-<div className="flex-1 space-y-6">
-  <Hero />
-  <Itinerary />
-  <FoodSection />
-</div>
+      <Hero />
+      <FeaturedDestinations />
+      <AIPlanner />
+      <PopularPackages />
+      
 
-      {/* Right */}
-<div className="w-[320px] space-y-6">
-  <RightSidebar />
-  <MapCard />
-</div>
-      </div>
       <Footer />
     </main>
   );
