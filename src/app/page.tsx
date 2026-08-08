@@ -1,9 +1,10 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/home/Hero";
-import Footer from "@/components/Footer";
 import FeaturedDestinations from "@/components/home/FeaturedDestinations";
-import PopularPackages from "@/components/home/PopularPackages";
 import AIPlanner from "@/components/home/AIPlanner";
+import PopularPackages from "@/components/home/PopularPackages";
+import Footer from "@/components/Footer";
+
 
 export default function Home() {
   return (
