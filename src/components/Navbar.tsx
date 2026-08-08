@@ -1,81 +1,84 @@
-"use client";
-
 import Link from "next/link";
 import { FaBell, FaGlobe } from "react-icons/fa";
 
-const navLinks = [
-  {
-    label: "Home",
-    href: "/",
-  },
-  {
-    label: "Destinations",
-    href: "/destinations",
-  },
-  {
-    label: "Packages",
-    href: "/packages",
-  },
-  {
-    label: "AI Planner",
-    href: "/ai-planner",
-  },
-  {
-    label: "My Bookings",
-    href: "/bookings",
-  },
-];
-
 export default function Navbar() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white shadow-sm">
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-8">
+    <header className="w-full bg-white border-b border-gray-200">
+      <div className="max-w-7xl mx-auto h-20 flex items-center justify-between px-8">
+
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-blue-700 text-lg font-bold text-white shadow-md">
+          <div className="w-10 h-10 rounded-lg bg-blue-700 text-white flex items-center justify-center font-bold">
             NT
           </div>
 
           <div>
-            <h1 className="text-xl font-bold text-gray-900">
-              Nepal Travels
+            <h1 className="text-xl font-bold text-black">
+              nepaltravels
             </h1>
-
-            <p className="text-sm text-gray-500">
-              Explore the Beauty of Nepal
+            <p className="text-xs text-gray-500">
+              Explore. Travel. Discover.
             </p>
           </div>
         </Link>
 
         {/* Navigation */}
-        <nav className="hidden items-center gap-8 md:flex">
-          {navLinks.map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className="border-b-2 border-transparent pb-1 text-[15px] font-medium text-gray-700 transition-all duration-200 hover:border-blue-600 hover:text-blue-600"
-            >
-              {item.label}
-            </Link>
-          ))}
+        <nav className="hidden md:flex gap-8 items-center">
+          <Link
+            href="/destinations"
+            className="text-gray-700 hover:text-blue-600 transition"
+          >
+            Destinations
+          </Link>
+
+          <Link
+            href="/packages"
+            className="text-gray-700 hover:text-blue-600 transition"
+          >
+            Packages
+          </Link>
+
+          <Link
+            href="/ai-planner"
+            className="text-gray-700 hover:text-blue-600 transition"
+          >
+            AI Planner
+          </Link>
+
+          <Link
+            href="/bookings"
+            className="text-gray-700 hover:text-blue-600 transition"
+          >
+            My Bookings
+          </Link>
+
+          <Link
+            href="/about"
+            className="text-gray-700 hover:text-blue-600 transition"
+          >
+            About Us
+          </Link>
         </nav>
 
-        {/* Right Side */}
-        <div className="flex items-center gap-5">
-          <button className="text-gray-600 transition hover:text-blue-600">
-            <FaBell size={18} />
+        {/* Right side */}
+        <div className="flex items-center gap-5 text-gray-700">
+          <button
+            aria-label="Notifications"
+            className="hover:text-blue-600 transition"
+          >
+            <FaBell />
           </button>
 
-          <button className="text-gray-600 transition hover:text-blue-600">
-            <FaGlobe size={18} />
+          <button
+            aria-label="Language"
+            className="hover:text-blue-600 transition"
+          >
+            <FaGlobe />
           </button>
 
-          <img
-            src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&auto=format&fit=crop&q=80"
-            alt="Profile"
-            className="h-10 w-10 rounded-full border-2 border-gray-200 object-cover"
-          />
+          <div className="w-10 h-10 rounded-full bg-gray-300"></div>
         </div>
+
       </div>
     </header>
   );
