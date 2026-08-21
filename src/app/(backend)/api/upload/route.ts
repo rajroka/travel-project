@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/auth/session";
-import { uploadImage } from "@/lib/cloudinary/upload";
-import { deleteImage } from "@/lib/cloudinary/delete";
+import { uploadImage } from "@/lib/imagekit/upload";
+import { deleteImage } from "@/lib/imagekit/delete";
 import { Gallery } from "@/lib/db/models/Gallery";
 import { connectDB } from "@/lib/db/connection";
 
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
 const MAX_SIZE_MB = 10;
 
-// POST /api/upload â€” upload one image to Cloudinary
+// POST /api/upload — upload one image to ImageKit
 export async function POST(req: NextRequest) {
   try {
     const session = await requireSession(req);
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
 
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
-        { success: false, message: "Invalid file type. Only JPEG, PNG, WebP, and GIF are allowed." },
+        { success: false, message: "Invalid file type. Only JPEG, PNG, WebP, GIF, and AVIF are allowed." },
         { status: 422 }
       );
     }
@@ -40,18 +40,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Convert to base64 data URI
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    const base64 = `data:${file.type};base64,${buffer.toString("base64")}`;
-
-    const result = await uploadImage(base64, `travel-project/${folder}`);
+    const ikFolder = `travel-project/${folder}`;
+    const result = await uploadImage(file, file.name, ikFolder);
 
     // Save to gallery
     const galleryEntry = await Gallery.create({
       title: title ?? file.name,
       imageUrl: result.url,
-      publicId: result.publicId,
+      fileId: result.fileId,
+      filePath: result.filePath,
       category,
       relatedId: relatedId ?? undefined,
       relatedModel: relatedModel ?? undefined,
@@ -64,7 +61,8 @@ export async function POST(req: NextRequest) {
         message: "Image uploaded successfully",
         data: {
           url: result.url,
-          publicId: result.publicId,
+          fileId: result.fileId,
+          filePath: result.filePath,
           width: result.width,
           height: result.height,
           galleryId: galleryEntry._id,
@@ -80,24 +78,24 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// DELETE /api/upload â€” delete an image from Cloudinary + gallery
+// DELETE /api/upload — delete an image from ImageKit + gallery
 export async function DELETE(req: NextRequest) {
   try {
     await requireSession(req);
     await connectDB();
 
-    const { publicId, galleryId } = await req.json() as { publicId?: string; galleryId?: string };
+    const { fileId, galleryId } = await req.json() as { fileId?: string; galleryId?: string };
 
-    if (!publicId) {
-      return NextResponse.json({ success: false, message: "publicId is required" }, { status: 400 });
+    if (!fileId) {
+      return NextResponse.json({ success: false, message: "fileId is required" }, { status: 400 });
     }
 
-    await deleteImage(publicId);
+    await deleteImage(fileId);
 
     if (galleryId) {
       await Gallery.findByIdAndDelete(galleryId);
     } else {
-      await Gallery.findOneAndDelete({ publicId });
+      await Gallery.findOneAndDelete({ fileId });
     }
 
     return NextResponse.json({ success: true, message: "Image deleted" }, { status: 200 });

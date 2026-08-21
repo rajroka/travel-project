@@ -1,96 +1,129 @@
-import { FaMapMarkerAlt, FaStar } from "react-icons/fa";
+"use client";
 
-const destinations = [
-  {
-    name: "Pokhara",
-    image:
-      "https://images.unsplash.com/photo-1590736969955-71cc94901144?w=800&q=80",
-    description: "The city of lakes with breathtaking mountain views.",
-    rating: 4.9,
-  },
-  {
-    name: "Everest Base Camp",
-    image:
-      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80",
-    description: "Experience the world's highest mountain.",
-    rating: 5.0,
-  },
-  {
-    name: "Chitwan National Park",
-    image:
-      "https://images.unsplash.com/photo-1516426122078-c23e76319801?w=800&q=80",
-    description: "Jungle safari and one-horned rhinoceros.",
-    rating: 4.8,
-  },
-  {
-    name: "Lumbini",
-    image:
-      "https://images.unsplash.com/photo-1528127269322-539801943592?w=800&q=80",
-    description: "Birthplace of Lord Buddha.",
-    rating: 4.7,
-  },
-];
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { FaStar } from "react-icons/fa";
+import { MapPinIcon, ArrowRight01Icon } from "hugeicons-react";
+
+interface Destination {
+  _id: string;
+  name: string;
+  slug: string;
+  coverImage?: string;
+  shortDescription?: string;
+  location: { city: string; country: string };
+  averageRating: number;
+  totalReviews: number;
+}
+
+function DestinationSkeleton() {
+  return (
+    <div className="overflow-hidden rounded-2xl bg-white shadow-lg">
+      <div className="h-64 animate-pulse bg-gray-200" />
+      <div className="p-6 space-y-3">
+        <div className="h-5 w-2/3 animate-pulse rounded bg-gray-200" />
+        <div className="h-4 w-1/2 animate-pulse rounded bg-gray-200" />
+        <div className="h-4 w-full animate-pulse rounded bg-gray-200" />
+        <div className="h-10 w-full animate-pulse rounded-lg bg-gray-200" />
+      </div>
+    </div>
+  );
+}
 
 export default function FeaturedDestinations() {
+  const [destinations, setDestinations] = useState<Destination[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/destinations?featured=true&limit=4")
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.success && json.data.destinations.length > 0) {
+          setDestinations(json.data.destinations);
+        } else {
+          // Fallback to non-featured destinations if no featured ones exist yet
+          return fetch("/api/destinations?limit=4")
+            .then((r) => r.json())
+            .then((j) => { if (j.success) setDestinations(j.data.destinations); });
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <section className="bg-gray-50 py-20">
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-6xl px-6">
 
         <div className="mb-12 text-center">
-          <h2 className="text-4xl font-bold text-gray-900">
-            Featured Destinations
-          </h2>
-
-          <p className="mt-4 text-gray-600">
-            Discover Nepal's most loved travel destinations.
-          </p>
+          <h2 className="text-4xl font-bold text-gray-900">Featured Destinations</h2>
+          <p className="mt-4 text-gray-500">Discover Nepal&apos;s most loved travel destinations.</p>
         </div>
 
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-          {destinations.map((place) => (
-            <div
-              key={place.name}
-              className="overflow-hidden rounded-2xl bg-white shadow-lg transition hover:-translate-y-2 hover:shadow-2xl"
-            >
-              <img
-                src={place.image}
-                alt={place.name}
-                className="h-64 w-full object-cover"
-              />
-
-              <div className="p-6">
-
-                <div className="mb-2 flex items-center justify-between">
-
-                  <h3 className="text-xl font-bold">
-                    {place.name}
-                  </h3>
-
-                  <div className="flex items-center gap-1 text-yellow-500">
-                    <FaStar />
-                    <span>{place.rating}</span>
+          {loading
+            ? Array.from({ length: 4 }).map((_, i) => <DestinationSkeleton key={i} />)
+            : destinations.map((place) => (
+                <div
+                  key={place._id}
+                  className="group overflow-hidden rounded-2xl bg-white shadow-lg transition hover:-translate-y-2 hover:shadow-2xl"
+                >
+                  <div className="relative h-64 bg-gradient-to-br from-blue-100 to-indigo-200">
+                    {place.coverImage ? (
+                      <Image
+                        src={place.coverImage}
+                        alt={place.name}
+                        fill
+                        className="object-cover transition group-hover:scale-105"
+                        sizes="(max-width: 768px) 100vw, 25vw"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center">
+                        <MapPinIcon className="text-blue-300" size={48} />
+                      </div>
+                    )}
                   </div>
 
+                  <div className="p-6">
+                    <div className="mb-2 flex items-center justify-between">
+                      <h3 className="text-xl font-bold text-gray-900">{place.name}</h3>
+                      {place.averageRating > 0 && (
+                        <div className="flex items-center gap-1 text-yellow-500">
+                          <FaStar size={13} />
+                          <span className="text-sm font-medium">{place.averageRating.toFixed(1)}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mb-4 flex items-center gap-1.5 text-sm text-gray-500">
+                      <MapPinIcon size={14} className="text-blue-500" />
+                      <span>{place.location.city}, {place.location.country}</span>
+                    </div>
+
+                    <p className="text-sm text-gray-600 line-clamp-2">
+                      {place.shortDescription ?? `Explore the beauty of ${place.name}.`}
+                    </p>
+
+                    <Link
+                      href={`/destinations/${place.slug}`}
+                      className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
+                    >
+                      Explore <ArrowRight01Icon size={16} />
+                    </Link>
+                  </div>
                 </div>
-
-                <div className="mb-5 flex items-center gap-2 text-gray-500">
-                  <FaMapMarkerAlt />
-                  Nepal
-                </div>
-
-                <p className="text-gray-600">
-                  {place.description}
-                </p>
-
-                <button className="mt-6 w-full rounded-lg bg-blue-700 py-3 font-semibold text-white transition hover:bg-blue-800">
-                  Explore
-                </button>
-
-              </div>
-            </div>
-          ))}
+              ))}
         </div>
 
+        <div className="mt-10 text-center">
+          <Link
+            href="/destinations"
+            className="inline-flex items-center gap-2 rounded-xl border border-blue-700 px-6 py-3 text-sm font-semibold text-blue-700 transition hover:bg-blue-50"
+          >
+            View all destinations <ArrowRight01Icon size={16} />
+          </Link>
+        </div>
       </div>
     </section>
   );
