@@ -1,17 +1,22 @@
 import { auth } from "@/lib/auth/better-auth";
-import { toNextJsHandler } from "better-auth/next-js";
 
 /**
  * Better Auth catch-all handler.
- * Handles all /api/auth/* routes automatically including:
+ * Handles all /api/auth/* routes:
  *   POST /api/auth/sign-up/email
  *   POST /api/auth/sign-in/email
  *   POST /api/auth/sign-out
- *   GET  /api/auth/sign-in/social?provider=google  (redirect flow)
+ *   GET  /api/auth/sign-in/social?provider=google
  *   GET  /api/auth/callback/google
  *   POST /api/auth/forget-password
  *   POST /api/auth/reset-password
  *   GET  /api/auth/verify-email
  *   GET  /api/auth/get-session
  */
-export const { GET, POST } = toNextJsHandler(auth);
+export async function GET(req: Request) {
+  return auth.handler(req);
+}
+
+export async function POST(req: Request) {
+  return auth.handler(req);
+}

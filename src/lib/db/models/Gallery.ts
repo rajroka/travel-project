@@ -3,7 +3,10 @@ import mongoose, { Document, Schema } from "mongoose";
 export interface IGallery extends Document {
   title?: string;
   imageUrl: string;
-  publicId: string;
+  fileId: string;       // ImageKit fileId (used for deletion)
+  filePath: string;     // ImageKit filePath (used for URL building)
+  /** @deprecated use fileId — kept for backward compat if any docs still reference it */
+  publicId?: string;
   category: "destination" | "package" | "general" | "banner";
   relatedId?: mongoose.Types.ObjectId;
   relatedModel?: "Destination" | "TourPackage";
@@ -18,7 +21,9 @@ const GallerySchema = new Schema<IGallery>(
   {
     title: { type: String },
     imageUrl: { type: String, required: true },
-    publicId: { type: String, required: true },
+    fileId: { type: String, required: true },
+    filePath: { type: String, required: true },
+    publicId: { type: String }, // kept for backward compat
     category: {
       type: String,
       enum: ["destination", "package", "general", "banner"],
