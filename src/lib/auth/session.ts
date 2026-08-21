@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAccessToken } from "./auth";
-import { auth } from "./better-auth";
+import { getAuthInstance } from "./better-auth";
 
 // ─── Unified session type ─────────────────────────────────────────────────────
 
@@ -21,7 +21,8 @@ export async function getBetterAuthSession(
   req: NextRequest
 ): Promise<AppSession | null> {
   try {
-    const session = await auth.api.getSession({
+    const authInstance = await getAuthInstance();
+    const session = await authInstance.api.getSession({
       headers: req.headers as unknown as Headers,
     });
     if (!session?.user) return null;
