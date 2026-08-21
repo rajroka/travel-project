@@ -416,7 +416,7 @@ Maps
 •	Leaflet (Alternative) 
 
 Image Storage
-•	Cloudinary 
+•	ImageKit 
 
 AI Integration
 •	DeepSeek API 

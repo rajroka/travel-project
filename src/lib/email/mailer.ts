@@ -1,5 +1,7 @@
 import nodemailer from "nodemailer";
-import { EmailNotification } from "@/lib/db/models/EmailNotification";
+
+// EmailNotification is imported lazily inside sendMail() to avoid pulling
+// mongoose into the Better Auth / Edge bundle at module load time.
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -26,14 +28,30 @@ export async function sendMail({
   userId,
   templateType,
 }: SendMailOptions): Promise<void> {
-  // Log email attempt
-  const emailLog = await EmailNotification.create({
-    user: userId,
-    toEmail: to,
-    subject,
-    templateType,
-    status: "pending",
-  });
+  // Lazy-import to avoid pulling mongoose into the Better Auth bundle
+  const { EmailNotification } = await import("@/lib/db/models/EmailNotification");
+  const { connectDB } = await import("@/lib/db/connection");
+
+  try {
+    await connectDB();
+  } catch {
+    // If DB is unavailable, still try to send the email
+  }
+
+  let emailLogId: string | null = null;
+
+  try {
+    const emailLog = await EmailNotification.create({
+      user: userId,
+      toEmail: to,
+      subject,
+      templateType,
+      status: "pending",
+    });
+    emailLogId = String(emailLog._id);
+  } catch {
+    // Non-fatal — proceed with sending even if logging fails
+  }
 
   try {
     await transporter.sendMail({
@@ -43,16 +61,21 @@ export async function sendMail({
       html,
     });
 
-    await EmailNotification.findByIdAndUpdate(emailLog._id, {
-      status: "sent",
-      sentAt: new Date(),
-    });
+    if (emailLogId) {
+      await EmailNotification.findByIdAndUpdate(emailLogId, {
+        status: "sent",
+        sentAt: new Date(),
+      }).catch(() => {});
+    }
   } catch (error) {
-    await EmailNotification.findByIdAndUpdate(emailLog._id, {
-      status: "failed",
-      errorMessage: (error as Error).message,
-    });
     console.error("Failed to send email:", error);
+    if (emailLogId) {
+      await EmailNotification.findByIdAndUpdate(emailLogId, {
+        status: "failed",
+        errorMessage: (error as Error).message,
+      }).catch(() => {});
+    }
+    // Don't rethrow — email failure should never crash the auth flow
   }
 }
 

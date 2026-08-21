@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifyJwtEdge } from "@/lib/auth/jwt-edge";
-import { getSessionCookie } from "better-auth/cookies";
 
 // ─── Route classification ────────────────────────────────────────────────────
 
@@ -23,8 +22,19 @@ const ADMIN_PREFIXES = ["/api/users", "/api/reports", "/api/dashboard/admin"];
 /** Staff or admin only */
 const STAFF_PREFIXES = ["/api/staff"];
 
+// Better Auth default session cookie name
+const BA_SESSION_COOKIE = "better-auth.session_token";
+
 function matchesAny(pathname: string, prefixes: string[]): boolean {
   return prefixes.some((p) => pathname.startsWith(p));
+}
+
+function getSessionCookie(req: NextRequest): string | undefined {
+  // Try the default Better Auth session cookie name
+  return (
+    req.cookies.get(BA_SESSION_COOKIE)?.value ??
+    req.cookies.get("__Secure-better-auth.session_token")?.value
+  );
 }
 
 export async function proxy(req: NextRequest) {
@@ -45,7 +55,7 @@ export async function proxy(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
   const jwtToken = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
 
-  // If neither exists, reject immediately
+  // If neither exists, reject
   if (!sessionCookie && !jwtToken) {
     return NextResponse.json(
       { success: false, message: "Unauthorized. Please log in." },

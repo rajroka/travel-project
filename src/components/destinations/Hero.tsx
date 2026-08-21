@@ -1,4 +1,4 @@
-import { FaMapMarkerAlt, FaSearch } from "react-icons/fa";
+import { MapPinIcon, Search01Icon } from "hugeicons-react";
 
 export default function Hero() {
   return (
@@ -13,7 +13,7 @@ export default function Hero() {
 
       <div className="absolute inset-0 bg-black/45" />
 
-      <div className="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-center px-6">
+      <div className="relative z-10 mx-auto flex h-full max-w-6xl flex-col justify-center px-6">
         <div className="max-w-3xl">
           <p className="mb-4 text-sm font-semibold uppercase tracking-[0.25em] text-white">
             Explore Nepal
@@ -33,7 +33,7 @@ export default function Hero() {
 
         <div className="mt-10 flex max-w-4xl items-center rounded-2xl bg-white p-3 shadow-2xl">
           <div className="flex flex-1 items-center gap-3 px-4">
-            <FaMapMarkerAlt className="text-blue-700" />
+            <MapPinIcon className="text-blue-700" size={20} />
 
             <div>
               <p className="text-xs text-gray-500">Destination</p>
@@ -44,7 +44,7 @@ export default function Hero() {
           </div>
 
           <button className="flex items-center gap-2 rounded-xl bg-blue-700 px-7 py-4 font-semibold text-white hover:bg-blue-800">
-            <FaSearch />
+            <Search01Icon size={18} />
             Search
           </button>
         </div>

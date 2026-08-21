@@ -222,7 +222,7 @@ Update profile fields (phone, avatar, address, etc.).
   "firstName": "Jane",
   "lastName": "Doe",
   "phone": "+977-9800000001",
-  "avatar": "https://res.cloudinary.com/...",
+  "avatar": "https://res.imagekit.com/...",
   "nationality": "Nepali",
   "dateOfBirth": "1995-01-15",
   "address": { "street": "123 Main St", "city": "Kathmandu", "country": "Nepal" }
@@ -1585,7 +1585,7 @@ Remove an image from the gallery.
 ## 17. File Upload
 
 ### POST /api/upload
-Upload an image to Cloudinary.
+Upload an image to ImageKit.
 
 **Auth required:** Any authenticated user  
 **Content-Type:** `multipart/form-data`
@@ -1594,7 +1594,7 @@ Upload an image to Cloudinary.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | file | File | Yes | Image file (JPEG/PNG/WebP/GIF, max 10MB) |
-| folder | string | No | Cloudinary sub-folder (e.g. `destinations`) |
+| folder | string | No | ImageKit sub-folder (e.g. `destinations`) |
 | category | string | No | `destination` · `package` · `general` · `banner` |
 | relatedId | string | No | ObjectId of related document |
 | relatedModel | string | No | `Destination` · `TourPackage` |
@@ -1604,8 +1604,8 @@ Upload an image to Cloudinary.
 ```json
 {
   "data": {
-    "url": "https://res.cloudinary.com/...",
-    "publicId": "travel-project/destinations/abc123",
+    "url": "https://res.imagekit.com/...",
+    "fileId": "travel-project/destinations/abc123",
     "width": 1920,
     "height": 1080,
     "galleryId": "galleryDocumentId"
@@ -1618,13 +1618,13 @@ Upload an image to Cloudinary.
 ---
 
 ### DELETE /api/upload
-Delete an image from Cloudinary and the Gallery collection.
+Delete an image from ImageKit and the Gallery collection.
 
 **Auth required:** Any authenticated user
 
 **Body:**
 ```json
-{ "publicId": "travel-project/destinations/abc123", "galleryId": "optionalGalleryId" }
+{ "fileId": "travel-project/destinations/abc123", "galleryId": "optionalGalleryId" }
 ```
 
 **Response 200:** `{ "message": "Image deleted" }`
@@ -1759,7 +1759,7 @@ src/
 │           ├── reviews/                # Reviews + admin actions
 │           ├── search/                 # Search + history
 │           ├── staff/                  # Staff management
-│           ├── upload/                 # Cloudinary image upload
+│           ├── upload/                 # ImageKit image upload
 │           └── users/                  # User management
 ├── lib/
 │   ├── ai/                             # DeepSeek client + itinerary generator
@@ -1769,7 +1769,7 @@ src/
 │   │   ├── auth-client.ts              # Frontend Better Auth client
 │   │   ├── session.ts                  # Unified session helper (cookie + JWT)
 │   │   └── middleware.ts               # Auth middleware helpers
-│   ├── cloudinary/                     # Upload + delete helpers
+│   ├── imagekit/                     # Upload + delete helpers
 │   ├── db/
 │   │   ├── connection.ts               # MongoDB connection (Mongoose)
 │   │   └── models/                     # 18 Mongoose models
