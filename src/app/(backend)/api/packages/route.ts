@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db/connection";
 import { TourPackage } from "@/lib/db/models/TourPackage";
+import { User } from "@/lib/db/models/User";
 import { requireRole } from "@/lib/auth/session";
+import { resolveMongoUser } from "@/lib/auth/resolve-user";
 import { createPackageSchema, packageQuerySchema } from "@/lib/validations/package";
 import { slugify, paginate, paginationMeta } from "@/lib/utils/helpers";
 
-// GET /api/packages â€” public, paginated + filtered
+// GET /api/packages — public, paginated + filtered
 export async function GET(req: NextRequest) {
   try {
     await connectDB();
@@ -68,7 +70,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST /api/packages â€” staff/admin only
+// POST /api/packages — staff/admin only
 export async function POST(req: NextRequest) {
   try {
     const session = await requireRole(req, "staff", "admin");
@@ -83,6 +85,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Resolve Mongoose _id — creates record on first OAuth login
+    const mongoUser = await resolveMongoUser(session);
+
     const slug = slugify(parsed.data.title);
     const existing = await TourPackage.findOne({ slug });
     const finalSlug = existing ? `${slug}-${Date.now()}` : slug;
@@ -90,7 +95,7 @@ export async function POST(req: NextRequest) {
     const pkg = await TourPackage.create({
       ...parsed.data,
       slug: finalSlug,
-      createdBy: session.userId,
+      createdBy: mongoUser._id,
     });
 
     return NextResponse.json(

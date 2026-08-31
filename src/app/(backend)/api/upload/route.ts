@@ -41,7 +41,22 @@ export async function POST(req: NextRequest) {
     }
 
     const ikFolder = `travel-project/${folder}`;
-    const result = await uploadImage(file, file.name, ikFolder);
+
+    // Map folder names to Gallery category enum values
+    const categoryMap: Record<string, string> = {
+      destinations: "destination",
+      destination: "destination",
+      packages: "package",
+      package: "package",
+      banner: "banner",
+    };
+    const galleryCategory = categoryMap[folder] ?? "general";
+
+    // Convert browser File → Buffer, pass mimeType so uploadImage can wrap it correctly
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const result = await uploadImage(buffer, file.name, file.type, ikFolder);
 
     // Save to gallery
     const galleryEntry = await Gallery.create({
@@ -49,7 +64,7 @@ export async function POST(req: NextRequest) {
       imageUrl: result.url,
       fileId: result.fileId,
       filePath: result.filePath,
-      category,
+      category: galleryCategory,
       relatedId: relatedId ?? undefined,
       relatedModel: relatedModel ?? undefined,
       uploadedBy: session.userId,

@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSession, signOut } from "@/lib/auth/auth-client";
+import { dashboardPathForRole } from "@/lib/auth/role-redirect";
 import { FiSearch, FiBell, FiChevronDown, FiUser, FiSettings, FiLogOut, FiMenu, FiX } from "react-icons/fi";
 
 const NAV_LINKS = [
@@ -15,41 +16,47 @@ const NAV_LINKS = [
   { label: "About", href: "/about" },
 ];
 
+type NavUser = {
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+  role?: string;
+};
+
 export default function Navbar() {
   const router = useRouter();
   const { data: session, isPending } = useSession();
   const user = session?.user;
 
   // ── Persist last known user so navbar doesn't flash to guest on navigation ──
-  const [cachedUser, setCachedUser] = useState<{
-    name: string; email: string; image?: string; role?: string;
-  } | null>(() => {
+  const [cachedUser] = useState<NavUser | null>(() => {
     if (typeof window === "undefined") return null;
     try {
       const stored = localStorage.getItem("_nav_user");
       return stored ? JSON.parse(stored) : null;
-    } catch { return null; }
+    } catch {
+      return null;
+    }
   });
 
   useEffect(() => {
     if (user) {
+      const sessionUser = user as NavUser;
       const toCache = {
-        name: user.name ?? "",
-        email: user.email ?? "",
-        image: user.image ?? undefined,
-        role: (user as { role?: string }).role,
+        name: sessionUser.name ?? "",
+        email: sessionUser.email ?? "",
+        image: sessionUser.image ?? undefined,
+        role: sessionUser.role,
       };
       localStorage.setItem("_nav_user", JSON.stringify(toCache));
-      setCachedUser(toCache);
     } else if (!isPending) {
       // Confirmed not logged in — clear cache
       localStorage.removeItem("_nav_user");
-      setCachedUser(null);
     }
   }, [user, isPending]);
 
   // Show cached user while session is being fetched to prevent flash
-  const displayUser = user ?? (isPending ? cachedUser : null) as typeof user;
+  const displayUser = (user as NavUser | undefined) ?? (isPending ? cachedUser : null);
 
   const [search, setSearch] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -81,11 +88,9 @@ export default function Navbar() {
     router.refresh();
   }
 
-  const dashboardHref =
-    (displayUser as { role?: string } | undefined)?.role === "admin" ||
-    (displayUser as { role?: string } | undefined)?.role === "staff"
-      ? "/admin/dashboard"
-      : "/dashboard";
+  const dashboardHref = dashboardPathForRole(
+    displayUser?.role
+  );
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white shadow-sm">
@@ -93,9 +98,13 @@ export default function Navbar() {
 
         {/* ── Logo ─────────────────────────────────────────────────────── */}
         <Link href="/" className="flex flex-shrink-0 items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white font-bold text-sm shadow-sm">
-            NT
-          </div>
+          <Image
+            src="/Nepal.png"
+            alt="nepaltravels logo"
+            width={36}
+            height={36}
+            className="rounded-xl object-contain"
+          />
           <span className="text-[15px] font-bold text-gray-900 tracking-tight">
             nepaltravels
           </span>

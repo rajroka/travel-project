@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db/connection";
 import { Payment } from "@/lib/db/models/Payment";
-import { requireSession, requireRole } from "@/lib/auth/session";
+import { requireSession } from "@/lib/auth/session";
+import { resolveMongoUser } from "@/lib/auth/resolve-user";
 import { paymentQuerySchema } from "@/lib/validations/payment";
 import { paginate, paginationMeta } from "@/lib/utils/helpers";
 
@@ -24,7 +25,10 @@ export async function GET(req: NextRequest) {
     const { skip } = paginate(page, limit);
 
     const filter: Record<string, unknown> = {};
-    if (session.role === "customer") filter.user = session.userId;
+    if (session.role === "customer") {
+      const mongoUser = await resolveMongoUser(session);
+      filter.user = mongoUser._id;
+    }
     if (status) filter.paymentStatus = status;
     if (method) filter.paymentMethod = method;
     if (startDate || endDate) {
@@ -48,6 +52,38 @@ export async function GET(req: NextRequest) {
       { success: true, data: { payments, pagination: paginationMeta(total, page, limit) } },
       { status: 200 }
     );
+  } catch (err: unknown) {
+    const e = err as { status?: number; message?: string };
+    if (e?.status) return NextResponse.json({ success: false, message: e.message }, { status: e.status });
+    return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500 });
+  }
+}
+
+// POST /api/payments — create a cash/offline payment record
+export async function POST(req: NextRequest) {
+  try {
+    const session = await requireSession(req);
+    await connectDB();
+
+    const { bookingId, amount, paymentMethod } = await req.json() as {
+      bookingId: string;
+      amount: number;
+      paymentMethod: string;
+    };
+
+    if (!bookingId || !amount || !paymentMethod) {
+      return NextResponse.json({ success: false, message: "bookingId, amount and paymentMethod are required" }, { status: 400 });
+    }
+
+    const payment = await Payment.create({
+      booking: bookingId,
+      user: session.userId,
+      amount,
+      paymentMethod,
+      paymentStatus: paymentMethod === "cash" ? "pending" : "pending",
+    });
+
+    return NextResponse.json({ success: true, data: { payment } }, { status: 201 });
   } catch (err: unknown) {
     const e = err as { status?: number; message?: string };
     if (e?.status) return NextResponse.json({ success: false, message: e.message }, { status: e.status });

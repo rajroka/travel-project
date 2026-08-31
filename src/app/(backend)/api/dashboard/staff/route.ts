@@ -16,6 +16,13 @@ export async function GET(req: NextRequest) {
     const endOfToday = new Date(startOfToday.getTime() + 24 * 60 * 60 * 1000);
 
     const [
+      totalBookings,
+      totalCustomers,
+      pendingApprovalsCount,
+      pendingCashPaymentsCount,
+      allPendingPaymentsCount,
+      completedPaymentsCount,
+      totalRevenueData,
       todayBookings,
       pendingApprovals,
       recentCustomers,
@@ -23,6 +30,17 @@ export async function GET(req: NextRequest) {
       recentPayments,
       upcomingSchedule,
     ] = await Promise.all([
+      Booking.countDocuments(),
+      User.countDocuments({ role: "customer", isActive: true }),
+      Booking.countDocuments({ status: "pending" }),
+      Payment.countDocuments({ paymentStatus: "pending", paymentMethod: "cash" }),
+      Payment.countDocuments({ paymentStatus: "pending" }),
+      Payment.countDocuments({ paymentStatus: "paid" }),
+      Payment.aggregate([
+        { $match: { paymentStatus: "paid" } },
+        { $group: { _id: null, total: { $sum: "$amount" } } },
+      ]),
+
       // Today's new bookings
       Booking.find({ createdAt: { $gte: startOfToday, $lt: endOfToday } })
         .populate("user", "firstName lastName email phone")
@@ -85,9 +103,23 @@ export async function GET(req: NextRequest) {
           pendingPayments,
           recentPayments,
           upcomingSchedule,
+          overview: {
+            totalBookings,
+            totalCustomers,
+            pendingApprovals: pendingApprovalsCount,
+            pendingCashPayments: pendingCashPaymentsCount,
+            pendingPayments: allPendingPaymentsCount,
+            completedPayments: completedPaymentsCount,
+            totalRevenue: totalRevenueData[0]?.total ?? 0,
+          },
         },
       },
-      { status: 200 }
+      {
+        status: 200,
+        headers: {
+          "Cache-Control": "no-store, max-age=0",
+        },
+      }
     );
   } catch (err: unknown) {
     const e = err as { status?: number; message?: string };

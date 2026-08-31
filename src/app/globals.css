@@ -14,16 +14,63 @@ html {
 }
 
 body {
-  /* Use Geist Sans — same font as Navbar and Packages page */
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
     BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   line-height: 1.6;
 }
 
-/* Inputs and buttons inherit font so forms match body text */
 input,
 textarea,
 select,
 button {
   font-family: inherit;
+}
+
+/* ── Thin elegant scrollbar (matches the design image) ───────────────────── */
+
+/* Applied via .scrollbar-thin utility class */
+.scrollbar-thin {
+  scrollbar-width: thin;               /* Firefox */
+  scrollbar-color: rgba(255,255,255,0.15) transparent; /* Firefox: thumb track */
+}
+
+/* Webkit (Chrome, Safari, Edge) */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 99px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+/* Light variant for white/light sidebars (customer dashboard) */
+.scrollbar-thin-light {
+  scrollbar-width: thin;
+  scrollbar-color: #e5e7eb transparent;
+}
+
+.scrollbar-thin-light::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar-thin-light::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin-light::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 99px;
+}
+
+.scrollbar-thin-light::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
 }
