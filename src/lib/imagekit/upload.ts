@@ -40,8 +40,11 @@ export async function uploadImage(
   const ext = fileName.includes(".") ? fileName.slice(fileName.lastIndexOf(".")) : "";
   const uniqueName = `${randomUUID()}${ext}`;
 
-  // Wrap Buffer in a native File — v7 SDK requires Uploadable (File/Response/Stream)
-  const blob = new Blob([buffer], { type: mimeType });
+  const arrayBuffer = new ArrayBuffer(buffer.byteLength);
+  new Uint8Array(arrayBuffer).set(buffer);
+
+  // Wrap Buffer data in a native File — v7 SDK requires Uploadable (File/Response/Stream)
+  const blob = new Blob([arrayBuffer], { type: mimeType });
   const file = new File([blob], uniqueName, { type: mimeType });
 
   const result = await imagekit.files.upload({

@@ -56,7 +56,7 @@ export default function ContactPage() {
     setSaved(true);
   }
 
-  const fields: Array<{ name: keyof ContactInfo | string; label: string; required?: boolean }> = [
+  const fields: Array<{ name: Exclude<keyof ContactInfo, "socialLinks">; label: string; required?: boolean }> = [
     { name: "companyName", label: "Company Name", required: true },
     { name: "email", label: "Email", required: true },
     { name: "phone", label: "Phone", required: true },
@@ -86,7 +86,7 @@ export default function ContactPage() {
                 <label className="mb-1.5 block text-sm font-medium text-gray-700">{f.label}</label>
                 <input
                   name={f.name}
-                  value={(form as Record<string, unknown>)[f.name] as string ?? ""}
+                  value={(form[f.name] as string | undefined) ?? ""}
                   onChange={handleChange}
                   required={f.required}
                   className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"

@@ -16,7 +16,6 @@ import {
   Tag01Icon,
   FilterIcon,
   ArrowRight01Icon,
-  SlidersIcon,
 } from "hugeicons-react";
 
 interface Package {

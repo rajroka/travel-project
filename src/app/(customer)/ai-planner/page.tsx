@@ -19,7 +19,14 @@ const INTERESTS = [
 
 interface GeneratedPlan {
   _id: string;
-  input: { destination: string; days: number; budget: number; interests: string[] };
+  input: {
+    destination: string;
+    days: number;
+    budget: number;
+    interests: string[];
+    numberOfTravelers?: number;
+    travelers?: number;
+  };
   generatedPlan: {
     recommendedPackages: Array<{
       _id: string;
@@ -276,7 +283,7 @@ export default function AITripPlannerPage() {
                         {plan.input.days}-Day {plan.input.destination} Trip
                       </h2>
                       <p className="mt-1 text-sm text-gray-500">
-                        ${plan.input.budget} budget Â· {plan.input.travelers ?? 1} traveler(s) Â·{" "}
+                        ${plan.input.budget} budget Â· {plan.input.numberOfTravelers ?? plan.input.travelers ?? 1} traveler(s) Â·{" "}
                         {plan.input.interests.join(", ")}
                       </p>
                     </div>

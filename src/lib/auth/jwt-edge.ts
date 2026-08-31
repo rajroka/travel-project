@@ -15,6 +15,12 @@ function base64urlDecode(str: string): Uint8Array {
   return bytes;
 }
 
+function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
+  const buffer = new ArrayBuffer(bytes.byteLength);
+  new Uint8Array(buffer).set(bytes);
+  return buffer;
+}
+
 export interface EdgeJwtPayload {
   userId: string;
   email: string;
@@ -41,7 +47,7 @@ export async function verifyJwtEdge(
     const keyData = new TextEncoder().encode(secret);
     const key = await crypto.subtle.importKey(
       "raw",
-      keyData,
+      toArrayBuffer(keyData),
       { name: "HMAC", hash: "SHA-256" },
       false,
       ["verify"]
@@ -50,7 +56,7 @@ export async function verifyJwtEdge(
     // Verify signature
     const sigBytes = base64urlDecode(sigB64);
     const data = new TextEncoder().encode(`${headerB64}.${payloadB64}`);
-    const valid = await crypto.subtle.verify("HMAC", key, sigBytes, data);
+    const valid = await crypto.subtle.verify("HMAC", key, toArrayBuffer(sigBytes), toArrayBuffer(data));
     if (!valid) return null;
 
     // Decode payload

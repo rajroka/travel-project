@@ -3,6 +3,8 @@ import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { MongoClient, Db } from "mongodb";
 import { nextCookies } from "better-auth/next-js";
 
+type AuthInstance = ReturnType<typeof betterAuth>;
+
 const MONGODB_URI = process.env.MONGODB_URI as string;
 if (!MONGODB_URI) throw new Error("Please define MONGODB_URI in .env.local");
 
@@ -35,14 +37,14 @@ function getMongoConnection(): Promise<{ client: MongoClient; db: Db }> {
 // We initialise a single auth instance per process.
 declare global {
   // eslint-disable-next-line no-var
-  var _authInstance: ReturnType<typeof betterAuth> | undefined;
+  var _authInstance: unknown;
 }
 
-async function buildAuth(): Promise<ReturnType<typeof betterAuth>> {
-  if (global._authInstance) return global._authInstance;
+async function buildAuth(): Promise<AuthInstance> {
+  if (global._authInstance) return global._authInstance as AuthInstance;
   const { client, db } = await getMongoConnection();
 
-  global._authInstance = betterAuth({
+  const instance = betterAuth({
     baseURL:
       process.env.BETTER_AUTH_URL ??
       process.env.NEXT_PUBLIC_APP_URL ??
@@ -129,7 +131,8 @@ async function buildAuth(): Promise<ReturnType<typeof betterAuth>> {
     plugins: [nextCookies()],
   });
 
-  return global._authInstance;
+  global._authInstance = instance;
+  return instance as unknown as AuthInstance;
 }
 
 // ─── Exported helpers ─────────────────────────────────────────────────────────
@@ -160,7 +163,7 @@ export const auth = {
       return instance.api.getSession(opts);
     },
   },
-} as ReturnType<typeof betterAuth>;
+} as unknown as AuthInstance;
 
 export type Session = Awaited<ReturnType<typeof buildAuth>>["$Infer"]["Session"];
 export type BetterAuthUser = Session["user"];

@@ -29,7 +29,7 @@ export const {
   signUp,
   signOut,
   useSession,
-  forgetPassword,
+  requestPasswordReset,
   resetPassword,
   sendVerificationEmail,
 } = authClient;

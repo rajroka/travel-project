@@ -378,6 +378,12 @@ export default function AdminDashboardPage() {
     count: p.count,
   }));
 
+  const revenueLineData = (data?.cashflow ?? []).map((item) => ({
+    month: item._id.month,
+    year: item._id.year,
+    revenue: item.revenue,
+  }));
+
   return (
     <div className="mx-auto max-w-7xl p-6">
 
@@ -423,7 +429,7 @@ export default function AdminDashboardPage() {
           </div>
           {loading
             ? <Skeleton className="h-48" />
-            : <RevenueLineChart data={data?.cashflow ?? []} />
+            : <RevenueLineChart data={revenueLineData} />
           }
         </div>
 
