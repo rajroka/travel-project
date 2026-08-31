@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { authClient } from "@/lib/auth/auth-client";
+import { getAuthoritativeDashboardPath } from "@/lib/auth/role-redirect";
 import { FcGoogle } from "react-icons/fc";
 import { ViewIcon, ViewOffIcon, Mail01Icon, SquareLockPasswordIcon } from "hugeicons-react";
 
@@ -33,28 +34,26 @@ export default function LoginForm() {
     const result = await authClient.signIn.email({
       email: form.email,
       password: form.password,
-      callbackURL: "/dashboard",
     });
 
-    setLoading(false);
-
     if (result.error) {
+      setLoading(false);
       setError(result.error.message ?? "Invalid email or password.");
       return;
     }
 
-    // Redirect based on role
-    const role = (result.data?.user as { role?: string })?.role;
-    if (role === "admin") router.push("/admin/dashboard");
-    else if (role === "staff") router.push("/admin/dashboard");
-    else router.push("/dashboard");
+    const fallbackRole = (result.data?.user as { role?: string })?.role;
+    const dashboardPath = await getAuthoritativeDashboardPath(fallbackRole);
+    setLoading(false);
+    router.replace(dashboardPath);
   }
 
   async function handleGoogle() {
     setGoogleLoading(true);
+    // Google OAuth lands on a role-aware callback page.
     await authClient.signIn.social({
       provider: "google",
-      callbackURL: "/dashboard",
+      callbackURL: "/auth/callback",
     });
     setGoogleLoading(false);
   }

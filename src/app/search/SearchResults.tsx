@@ -71,11 +71,22 @@ export default function SearchResults() {
     }
   }, []);
 
+  // Sync URL param → local state + run search whenever q changes
   useEffect(() => {
-    if (q) { setQuery(q); setInputVal(q); doSearch(q, tab); }
+    if (q) {
+      setQuery(q);
+      setInputVal(q);
+      doSearch(q, tab);
+    } else {
+      setQuery("");
+      setInputVal("");
+      setDestinations([]);
+      setPackages([]);
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q]);
 
+  // Re-run when tab changes (only if a query exists)
   useEffect(() => {
     if (query) doSearch(query, tab);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -84,9 +95,8 @@ export default function SearchResults() {
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     if (!inputVal.trim()) return;
+    // Push to URL — the useEffect on `q` will pick it up and run the search
     router.push(`/search?q=${encodeURIComponent(inputVal.trim())}`);
-    setQuery(inputVal.trim());
-    doSearch(inputVal.trim(), tab);
   }
 
   const totalResults = destinations.length + packages.length;
