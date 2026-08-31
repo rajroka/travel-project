@@ -1,6 +1,12 @@
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+
+if (!STRIPE_SECRET_KEY) {
+  throw new Error("STRIPE_SECRET_KEY is not configured");
+}
+
+const stripe = new Stripe(STRIPE_SECRET_KEY);
 
 export interface StripePaymentIntentParams {
   amount: number; // in USD (dollars) — will be converted to cents internally
@@ -13,8 +19,13 @@ export interface StripePaymentIntentParams {
 export async function createPaymentIntent(
   params: StripePaymentIntentParams
 ): Promise<Stripe.PaymentIntent> {
+  const amountInCents = Math.round(params.amount * 100);
+  if (!Number.isFinite(amountInCents) || amountInCents < 100) {
+    throw new Error("Stripe payment amount must be at least 1.00");
+  }
+
   return stripe.paymentIntents.create({
-    amount: Math.round(params.amount * 100), // Stripe requires cents: $450 → 45000
+    amount: amountInCents, // Stripe requires cents: $450 → 45000
     currency: params.currency || "usd",
     metadata: {
       bookingId: params.bookingId,

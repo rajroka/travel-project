@@ -37,7 +37,7 @@ export default function RootLayout({
         Apply the Geist Sans font class directly on body so every page
         inherits the same typeface — regardless of which layout wraps them.
       */}
-      <body className={`${geistSans.className} min-h-full flex flex-col`}>
+      <body className={`${geistSans.className} min-h-full flex flex-col`} suppressHydrationWarning>
         {children}
       </body>
     </html>

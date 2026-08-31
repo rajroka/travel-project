@@ -6,7 +6,16 @@ import Image from "next/image";
 import { FaStar } from "react-icons/fa";
 import { MapPinIcon, ArrowRight01Icon } from "hugeicons-react";
 
-interface Destination {
+const FALLBACK = [
+  "https://images.unsplash.com/photo-1605640840605-14ac1855827b?w=900&q=85", // Everest
+  "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=900&q=85",    // Annapurna
+  "https://images.unsplash.com/photo-1507743617593-0a422c9bb7f5?w=900&q=85", // Pokhara
+  "https://images.unsplash.com/photo-1570637020039-e3a81f33d027?w=900&q=85", // Kathmandu temple
+  "https://images.unsplash.com/photo-1585016495481-91613d49c5fb?w=900&q=85", // Himalaya range
+  "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=85",    // Nepal valley
+];
+
+interface Dest {
   _id: string;
   name: string;
   slug: string;
@@ -15,111 +24,130 @@ interface Destination {
   location: { city: string; country: string };
   averageRating: number;
   totalReviews: number;
+  bestSeason?: string[];
 }
 
-function DestinationSkeleton() {
+function Skeleton() {
   return (
-    <div className="overflow-hidden rounded-2xl bg-white shadow-lg">
-      <div className="h-64 animate-pulse bg-gray-200" />
-      <div className="p-6 space-y-3">
+    <div>
+      <div className="aspect-[4/3] animate-pulse rounded-2xl bg-gray-200" />
+      <div className="mt-4 space-y-2 px-1">
         <div className="h-5 w-2/3 animate-pulse rounded bg-gray-200" />
         <div className="h-4 w-1/2 animate-pulse rounded bg-gray-200" />
         <div className="h-4 w-full animate-pulse rounded bg-gray-200" />
-        <div className="h-10 w-full animate-pulse rounded-lg bg-gray-200" />
       </div>
     </div>
   );
 }
 
 export default function FeaturedDestinations() {
-  const [destinations, setDestinations] = useState<Destination[]>([]);
+  const [destinations, setDestinations] = useState<Dest[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Fetch featured first, fallback to any destinations
     fetch("/api/destinations?featured=true&limit=4")
-      .then((r) => r.json())
-      .then((json) => {
+      .then(r => r.json())
+      .then(json => {
         if (json.success && json.data.destinations.length > 0) {
           setDestinations(json.data.destinations);
         } else {
-          // Fallback to non-featured destinations if no featured ones exist yet
           return fetch("/api/destinations?limit=4")
-            .then((r) => r.json())
-            .then((j) => { if (j.success) setDestinations(j.data.destinations); });
+            .then(r => r.json())
+            .then(j => { if (j.success) setDestinations(j.data.destinations); });
         }
       })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
+  if (!loading && destinations.length === 0) return (
+    <section className="bg-white py-24">
+      <div className="mx-auto max-w-6xl px-6 text-center">
+        <h2 className="text-4xl font-extrabold tracking-tight text-gray-900">Featured Destinations</h2>
+        <p className="mt-4 text-gray-400">No destinations available yet. Check back soon.</p>
+      </div>
+    </section>
+  );
+
   return (
-    <section className="bg-gray-50 py-20">
+    <section className="bg-white py-24">
       <div className="mx-auto max-w-6xl px-6">
 
-        <div className="mb-12 text-center">
-          <h2 className="text-4xl font-bold text-gray-900">Featured Destinations</h2>
-          <p className="mt-4 text-gray-500">Discover Nepal&apos;s most loved travel destinations.</p>
+        <div className="mb-14 text-center">
+          <h2 className="text-4xl font-extrabold tracking-tight text-gray-900">
+            Featured Destinations
+          </h2>
+          <p className="mt-3 text-gray-500">
+            Nepal&apos;s most loved travel destinations, handpicked for you.
+          </p>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {loading
-            ? Array.from({ length: 4 }).map((_, i) => <DestinationSkeleton key={i} />)
-            : destinations.map((place) => (
-                <div
-                  key={place._id}
-                  className="group overflow-hidden rounded-2xl bg-white shadow-lg transition hover:-translate-y-2 hover:shadow-2xl"
-                >
-                  <div className="relative h-64 bg-gradient-to-br from-blue-100 to-indigo-200">
-                    {place.coverImage ? (
+            ? Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} />)
+            : destinations.map((place, i) => {
+                const isRealPhoto = place.coverImage &&
+                  !place.coverImage.includes("Nepal.png") &&
+                  !place.coverImage.includes("nepal.png");
+                const photo = isRealPhoto ? place.coverImage! : FALLBACK[i % FALLBACK.length];
+                return (
+                  <Link key={place._id} href={`/destinations/${place.slug}`} className="group block">
+
+                    {/* Image — fully rounded, badges inside */}
+                    <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
                       <Image
-                        src={place.coverImage}
+                        src={photo}
                         alt={place.name}
                         fill
-                        className="object-cover transition group-hover:scale-105"
-                        sizes="(max-width: 768px) 100vw, 25vw"
+                        className="object-cover transition duration-500 group-hover:scale-105"
+                        sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 25vw"
                       />
-                    ) : (
-                      <div className="flex h-full items-center justify-center">
-                        <MapPinIcon className="text-blue-300" size={48} />
-                      </div>
-                    )}
-                  </div>
 
-                  <div className="p-6">
-                    <div className="mb-2 flex items-center justify-between">
-                      <h3 className="text-xl font-bold text-gray-900">{place.name}</h3>
+                      {/* Country — top left */}
+                      <span className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-gray-800 shadow-sm backdrop-blur-sm">
+                        {place.location.country}
+                      </span>
+
+                      {/* Rating — top right */}
                       {place.averageRating > 0 && (
-                        <div className="flex items-center gap-1 text-yellow-500">
-                          <FaStar size={13} />
-                          <span className="text-sm font-medium">{place.averageRating.toFixed(1)}</span>
-                        </div>
+                        <span className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-gray-800 shadow-sm backdrop-blur-sm">
+                          <FaStar size={10} className="text-amber-400" />
+                          {place.averageRating.toFixed(1)}
+                        </span>
                       )}
                     </div>
 
-                    <div className="mb-4 flex items-center gap-1.5 text-sm text-gray-500">
-                      <MapPinIcon size={14} className="text-blue-500" />
-                      <span>{place.location.city}, {place.location.country}</span>
+                    {/* Text below */}
+                    <div className="mt-4 px-1">
+                      <h3 className="text-lg font-bold text-gray-900 leading-snug line-clamp-1 group-hover:text-blue-700 transition-colors">
+                        {place.name}
+                      </h3>
+
+                      <div className="mt-1 flex items-center gap-1.5 text-sm text-gray-400">
+                        <MapPinIcon size={13} />
+                        <span className="truncate">{place.location.city}</span>
+                      </div>
+
+                      <p className="mt-2 text-sm text-gray-500 line-clamp-2">
+                        {place.shortDescription ?? `Explore the breathtaking beauty of ${place.name}.`}
+                      </p>
+
+                      {place.bestSeason && place.bestSeason.length > 0 && (
+                        <p className="mt-2 text-xs text-gray-400">
+                          Best in {place.bestSeason.slice(0, 2).join(" & ")}
+                        </p>
+                      )}
                     </div>
-
-                    <p className="text-sm text-gray-600 line-clamp-2">
-                      {place.shortDescription ?? `Explore the beauty of ${place.name}.`}
-                    </p>
-
-                    <Link
-                      href={`/destinations/${place.slug}`}
-                      className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
-                    >
-                      Explore <ArrowRight01Icon size={16} />
-                    </Link>
-                  </div>
-                </div>
-              ))}
+                  </Link>
+                );
+              })}
         </div>
 
-        <div className="mt-10 text-center">
+        <div className="mt-14 text-center">
           <Link
             href="/destinations"
-            className="inline-flex items-center gap-2 rounded-xl border border-blue-700 px-6 py-3 text-sm font-semibold text-blue-700 transition hover:bg-blue-50"
+            className="inline-flex items-center gap-2 rounded-xl border-2 border-blue-700 px-8 py-3.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-700 hover:text-white"
           >
             View all destinations <ArrowRight01Icon size={16} />
           </Link>

@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db/connection";
 import { Destination } from "@/lib/db/models/Destination";
+import { User } from "@/lib/db/models/User";
 import { requireRole } from "@/lib/auth/session";
+import { resolveMongoUser } from "@/lib/auth/resolve-user";
 import { createDestinationSchema, destinationQuerySchema } from "@/lib/validations/destination";
 import { slugify, paginate, paginationMeta } from "@/lib/utils/helpers";
 
-// GET /api/destinations â€” public, paginated list with filters
+// GET /api/destinations — public, paginated list with filters
 export async function GET(req: NextRequest) {
   try {
     await connectDB();
@@ -22,7 +24,6 @@ export async function GET(req: NextRequest) {
     const { page, limit, search, category, country, city, featured, sort } = parsed.data;
     const { skip } = paginate(page, limit);
 
-    // Build filter
     const filter: Record<string, unknown> = { isActive: true };
     if (search) filter.$text = { $search: search };
     if (category) filter.category = category;
@@ -30,7 +31,6 @@ export async function GET(req: NextRequest) {
     if (city) filter["location.city"] = { $regex: city, $options: "i" };
     if (featured !== undefined) filter.isFeatured = featured;
 
-    // Build sort
     const sortMap: Record<string, Record<string, 1 | -1>> = {
       name: { name: 1 },
       rating: { averageRating: -1 },
@@ -49,10 +49,7 @@ export async function GET(req: NextRequest) {
     ]);
 
     return NextResponse.json(
-      {
-        success: true,
-        data: { destinations, pagination: paginationMeta(total, page, limit) },
-      },
+      { success: true, data: { destinations, pagination: paginationMeta(total, page, limit) } },
       { status: 200 }
     );
   } catch (error) {
@@ -61,7 +58,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST /api/destinations â€” staff/admin only
+// POST /api/destinations — staff/admin only
 export async function POST(req: NextRequest) {
   try {
     const session = await requireRole(req, "staff", "admin");
@@ -76,6 +73,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Resolve Mongoose _id — creates record on first OAuth login
+    const mongoUser = await resolveMongoUser(session);
+
     const slug = slugify(parsed.data.name);
     const existing = await Destination.findOne({ slug });
     const finalSlug = existing ? `${slug}-${Date.now()}` : slug;
@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
     const destination = await Destination.create({
       ...parsed.data,
       slug: finalSlug,
-      createdBy: session.userId,
+      createdBy: mongoUser._id,
     });
 
     return NextResponse.json(

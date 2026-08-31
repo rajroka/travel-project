@@ -5,6 +5,7 @@ import { BookingDetail } from "@/lib/db/models/BookingDetail";
 import { Notification } from "@/lib/db/models/Notification";
 import { User } from "@/lib/db/models/User";
 import { requireSession, requireRole } from "@/lib/auth/session";
+import { resolveMongoUser } from "@/lib/auth/resolve-user";
 import { updateBookingStatusSchema } from "@/lib/validations/booking";
 import { sendMail, bookingStatusTemplate } from "@/lib/email/mailer";
 
@@ -24,9 +25,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ success: false, message: "Booking not found" }, { status: 404 });
     }
 
-    // Customers can only view their own bookings
-    if (session.role === "customer" && String((booking.user as { _id: unknown })._id) !== session.userId) {
-      return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 });
+    // Customers can only view their own bookings. Compare against the Mongoose
+    // user id because bookings are stored with User._id, not Better Auth user.id.
+    if (session.role === "customer") {
+      const mongoUser = await resolveMongoUser(session);
+      if (String((booking.user as { _id: unknown })._id) !== String(mongoUser._id)) {
+        return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 });
+      }
     }
 
     const detail = await BookingDetail.findOne({ booking: id }).lean();

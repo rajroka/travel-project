@@ -1,24 +1,37 @@
+import Image from "next/image";
+import Link from "next/link";
+
 export default function Footer() {
   return (
     <footer className="bg-[#0F172A] text-white mt-10">
-      <div className="max-w-7xl mx-auto px-8 py-10 flex justify-between items-center">
+      <div className="max-w-6xl mx-auto px-8 py-10 flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between">
 
+        {/* Logo + tagline */}
         <div>
-          <h2 className="text-2xl font-bold">
-            nepaltravels
-          </h2>
-
-          <p className="text-gray-400 mt-2">
-            © 2024 nepaltravels Tours & Travels.
-            All rights reserved.
+          <Link href="/" className="flex items-center gap-3">
+            <Image
+              src="/Nepal.png"
+              alt="nepaltravels logo"
+              width={40}
+              height={40}
+              className="rounded-xl object-contain"
+            />
+            <span className="text-xl font-bold text-white">nepaltravels</span>
+          </Link>
+          <p className="text-gray-400 mt-3 text-sm">
+            © {new Date().getFullYear()} nepaltravels Tours & Travels.
+            <br />All rights reserved.
           </p>
         </div>
 
-        <div className="flex gap-8 text-gray-300">
-          <a href="#">Contact Us</a>
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Service</a>
-          <a href="#">FAQ</a>
+        {/* Links */}
+        <div className="flex flex-wrap gap-6 text-sm text-gray-300">
+          <Link href="/destinations" className="hover:text-white transition">Destinations</Link>
+          <Link href="/packages" className="hover:text-white transition">Packages</Link>
+          <Link href="/ai-planner" className="hover:text-white transition">AI Planner</Link>
+          <Link href="/about" className="hover:text-white transition">About</Link>
+          <Link href="#" className="hover:text-white transition">Contact</Link>
+          <Link href="#" className="hover:text-white transition">Privacy Policy</Link>
         </div>
 
       </div>

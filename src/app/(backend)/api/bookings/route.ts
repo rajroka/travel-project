@@ -6,6 +6,7 @@ import { TourPackage } from "@/lib/db/models/TourPackage";
 import { Notification } from "@/lib/db/models/Notification";
 import { User } from "@/lib/db/models/User";
 import { requireSession } from "@/lib/auth/session";
+import { resolveMongoUser } from "@/lib/auth/resolve-user";
 import { createBookingSchema, bookingQuerySchema } from "@/lib/validations/booking";
 import { generateBookingNumber } from "@/lib/auth/auth";
 import { paginate, paginationMeta } from "@/lib/utils/helpers";
@@ -31,8 +32,12 @@ export async function GET(req: NextRequest) {
 
     const filter: Record<string, unknown> = {};
 
-    // Customers only see their own bookings
-    if (session.role === "customer") filter.user = session.userId;
+    // Customers only see their own bookings. Better Auth user ids are not the
+    // same as the Mongoose User _id used by bookings, so resolve by email.
+    if (session.role === "customer") {
+      const mongoUser = await resolveMongoUser(session);
+      filter.user = mongoUser._id;
+    }
 
     if (status) filter.status = status;
     if (paymentStatus) filter.paymentStatus = paymentStatus;
@@ -90,6 +95,9 @@ export async function POST(req: NextRequest) {
 
     const { packageId, travelDate, numberOfTravelers, specialRequests, travelers, emergencyContact, dietaryRequirements, medicalConditions } = parsed.data;
 
+    // Resolve Mongoose user — creates record on first OAuth login
+    const mongoUser = await resolveMongoUser(session);
+
     // Validate package exists and is active
     const pkg = await TourPackage.findById(packageId);
     if (!pkg || !pkg.isActive) {
@@ -110,7 +118,7 @@ export async function POST(req: NextRequest) {
 
     const booking = await Booking.create({
       bookingNumber,
-      user: session.userId,
+      user: mongoUser._id,
       package: packageId,
       travelDate: new Date(travelDate),
       numberOfTravelers,
@@ -134,7 +142,7 @@ export async function POST(req: NextRequest) {
 
     // In-app notification for customer
     await Notification.create({
-      user: session.userId,
+      user: mongoUser._id,
       type: "booking_confirmed",
       title: "Booking Received",
       message: `Your booking ${bookingNumber} for ${pkg.title} has been received and is pending confirmation.`,
@@ -144,7 +152,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Email confirmation
-    const user = await User.findById(session.userId);
+    const user = await User.findById(mongoUser._id);
     if (user) {
       sendMail({
         to: user.email,
@@ -156,7 +164,7 @@ export async function POST(req: NextRequest) {
           new Date(travelDate).toLocaleDateString(),
           totalAmount
         ),
-        userId: session.userId,
+        userId: String(mongoUser._id),
         templateType: "booking_confirmation",
       }).catch(console.error);
     }
