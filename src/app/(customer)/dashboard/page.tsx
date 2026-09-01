@@ -7,12 +7,9 @@ import {
   Calendar03Icon,
   HeartCheckIcon,
   Location01Icon,
-  StarIcon,
+  CreditCardIcon,
   ArrowRight01Icon,
 } from "hugeicons-react";
-import { FaStar } from "react-icons/fa";
-
-// ─── Types ──────────────────────────────────────────────────────────────────
 
 interface DashboardData {
   upcomingTrips: Array<{
@@ -24,7 +21,6 @@ interface DashboardData {
   }>;
   bookingStats: { pending: number; confirmed: number; completed: number; cancelled: number };
   favoritesCount: number;
-  savedPlans: Array<{ _id: string; planName?: string; input: { destination: string } }>;
   unreadNotifications: number;
   paymentHistory: Array<{
     _id: string;
@@ -36,7 +32,7 @@ interface DashboardData {
   pendingPayments: Array<{ _id: string; bookingNumber: string; totalAmount: number }>;
 }
 
-// ─── Donut chart ────────────────────────────────────────────────────────────
+// ── Donut chart ────────────────────────────────────────────────────────────
 
 function polarToCart(cx: number, cy: number, r: number, deg: number) {
   const rad = (deg * Math.PI) / 180;
@@ -45,7 +41,7 @@ function polarToCart(cx: number, cy: number, r: number, deg: number) {
 
 function DonutChart({ data }: { data: Array<{ label: string; value: number; color: string }> }) {
   const total = data.reduce((s, d) => s + d.value, 0);
-  if (total === 0) return <div className="flex h-32 items-center justify-center text-sm text-gray-400">No data yet</div>;
+  if (total === 0) return <div className="flex h-32 items-center justify-center text-sm text-gray-400">No bookings yet</div>;
 
   let angle = -90;
   const cx = 60; const cy = 60; const r = 44; const ir = 26;
@@ -84,10 +80,10 @@ function DonutChart({ data }: { data: Array<{ label: string; value: number; colo
   );
 }
 
-// ─── Bar chart ───────────────────────────────────────────────────────────────
+// ── Bar chart ─────────────────────────────────────────────────────────────
 
 function BarChart({ payments }: { payments: DashboardData["paymentHistory"] }) {
-  if (payments.length === 0) return <div className="flex h-28 items-center justify-center text-sm text-gray-400">No payment data</div>;
+  if (!payments || payments.length === 0) return <div className="flex h-28 items-center justify-center text-sm text-gray-400">No payment data</div>;
   const map: Record<string, number> = {};
   payments.forEach((p) => {
     const key = new Date(p.createdAt).toLocaleDateString("en-US", { month: "short" });
@@ -112,7 +108,7 @@ function BarChart({ payments }: { payments: DashboardData["paymentHistory"] }) {
   );
 }
 
-// ─── Page ────────────────────────────────────────────────────────────────────
+// ── Page ──────────────────────────────────────────────────────────────────
 
 export default function CustomerDashboardPage() {
   const { data: session } = useSession();
@@ -130,17 +126,17 @@ export default function CustomerDashboardPage() {
   }, []);
 
   const stats = [
-    { label: "Upcoming",   value: data?.bookingStats.confirmed ?? 0, icon: <Calendar03Icon size={20} className="text-blue-600" />,  bg: "bg-blue-50",   href: "/dashboard/upcoming-trips" },
-    { label: "Completed",  value: data?.bookingStats.completed ?? 0, icon: <Location01Icon size={20} className="text-green-600" />, bg: "bg-green-50",  href: "/dashboard/bookings" },
-    { label: "Favourites", value: data?.favoritesCount ?? 0,         icon: <HeartCheckIcon size={20} className="text-red-500" />,   bg: "bg-red-50",    href: "/dashboard/favorites" },
-    { label: "AI Plans",   value: data?.savedPlans.length ?? 0,      icon: <StarIcon size={20} className="text-purple-600" />,      bg: "bg-purple-50", href: "/dashboard/ai-plans" },
+    { label: "Upcoming",   value: data?.bookingStats?.confirmed  ?? 0, icon: <Calendar03Icon size={20} className="text-blue-600" />,  bg: "bg-blue-50",  href: "/dashboard/upcoming-trips" },
+    { label: "Completed",  value: data?.bookingStats?.completed  ?? 0, icon: <Location01Icon size={20} className="text-green-600" />, bg: "bg-green-50", href: "/dashboard/bookings" },
+    { label: "Favourites", value: data?.favoritesCount           ?? 0, icon: <HeartCheckIcon size={20} className="text-red-500" />,   bg: "bg-red-50",   href: "/dashboard/favorites" },
+    { label: "Payments",   value: data?.paymentHistory?.length   ?? 0, icon: <CreditCardIcon size={20} className="text-indigo-600" />, bg: "bg-indigo-50", href: "/dashboard/payments" },
   ];
 
   const bookingChartData = [
-    { label: "Confirmed", value: data?.bookingStats.confirmed ?? 0, color: "#22c55e" },
-    { label: "Pending",   value: data?.bookingStats.pending   ?? 0, color: "#f59e0b" },
-    { label: "Completed", value: data?.bookingStats.completed ?? 0, color: "#3b82f6" },
-    { label: "Cancelled", value: data?.bookingStats.cancelled ?? 0, color: "#ef4444" },
+    { label: "Confirmed", value: data?.bookingStats?.confirmed ?? 0, color: "#22c55e" },
+    { label: "Pending",   value: data?.bookingStats?.pending   ?? 0, color: "#f59e0b" },
+    { label: "Completed", value: data?.bookingStats?.completed ?? 0, color: "#3b82f6" },
+    { label: "Cancelled", value: data?.bookingStats?.cancelled ?? 0, color: "#ef4444" },
   ].filter((d) => d.value > 0);
 
   return (
@@ -216,7 +212,7 @@ export default function CustomerDashboardPage() {
             </div>
           ) : (
             <div className="space-y-2">
-              {data?.upcomingTrips.slice(0, 4).map((trip) => (
+              {(data?.upcomingTrips ?? []).slice(0, 4).map((trip) => (
                 <Link key={trip._id} href={`/bookings/${trip._id}`}
                   className="flex items-center gap-3 rounded-xl border border-gray-100 p-3 hover:bg-gray-50 transition"
                 >
@@ -241,58 +237,35 @@ export default function CustomerDashboardPage() {
           )}
         </div>
 
-        {/* Payments + AI plans */}
-        <div className="space-y-5">
-          <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-semibold text-gray-900">Recent Payments</h2>
-              <Link href="/dashboard/payments" className="text-xs text-blue-600 hover:underline">See all</Link>
-            </div>
-            {loading ? (
-              <div className="space-y-2">{[1,2].map((i) => <div key={i} className="h-10 animate-pulse rounded-lg bg-gray-100" />)}</div>
-            ) : (data?.paymentHistory ?? []).length === 0 ? (
-              <p className="text-sm text-gray-400">No payments yet.</p>
-            ) : (
-              <div className="space-y-2">
-                {data?.paymentHistory.slice(0, 3).map((p) => (
-                  <div key={p._id} className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2">
-                    <div>
-                      <p className="text-sm font-medium capitalize text-gray-800">{p.paymentMethod}</p>
-                      <p className="text-xs text-gray-400">{new Date(p.createdAt).toLocaleDateString()}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-gray-900">${p.amount}</p>
-                      <span className={`text-xs capitalize ${p.paymentStatus === "paid" ? "text-green-600" : "text-yellow-600"}`}>
-                        {p.paymentStatus}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+        {/* Recent Payments */}
+        <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-semibold text-gray-900">Recent Payments</h2>
+            <Link href="/dashboard/payments" className="text-xs text-blue-600 hover:underline">See all</Link>
           </div>
-
-          {(data?.savedPlans ?? []).length > 0 && (
-            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="font-semibold text-gray-900">Saved AI Plans</h2>
-                <Link href="/dashboard/ai-plans" className="text-xs text-blue-600 hover:underline">View all</Link>
-              </div>
-              <div className="space-y-2">
-                {data?.savedPlans.slice(0, 3).map((plan) => (
-                  <Link key={plan._id} href="/dashboard/ai-plans"
-                    className="flex items-center gap-3 rounded-xl border border-gray-100 p-3 hover:bg-gray-50 transition"
-                  >
-                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-purple-50">
-                      <StarIcon size={15} className="text-purple-600" />
-                    </div>
-                    <p className="min-w-0 flex-1 truncate text-sm font-medium text-gray-900">
-                      {plan.planName ?? plan.input.destination}
-                    </p>
-                    <ArrowRight01Icon size={14} className="text-gray-300" />
-                  </Link>
-                ))}
-              </div>
+          {loading ? (
+            <div className="space-y-2">{[1,2,3].map((i) => <div key={i} className="h-10 animate-pulse rounded-lg bg-gray-100" />)}</div>
+          ) : (data?.paymentHistory ?? []).length === 0 ? (
+            <div className="flex flex-col items-center py-8 text-center">
+              <CreditCardIcon size={40} className="mb-2 text-gray-300" />
+              <p className="text-sm text-gray-400">No payments yet.</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {(data?.paymentHistory ?? []).slice(0, 4).map((p) => (
+                <div key={p._id} className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2.5">
+                  <div>
+                    <p className="text-sm font-medium capitalize text-gray-800">{p.paymentMethod}</p>
+                    <p className="text-xs text-gray-400">{new Date(p.createdAt).toLocaleDateString()}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-semibold text-gray-900">${p.amount}</p>
+                    <span className={`text-xs capitalize ${p.paymentStatus === "paid" ? "text-green-600" : "text-yellow-600"}`}>
+                      {p.paymentStatus}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
