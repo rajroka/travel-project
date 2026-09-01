@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# large media files - keep homevideo1.mp4 (compressed version)
+public/homevideo.mp4
