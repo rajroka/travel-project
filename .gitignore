@@ -40,6 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# large media files - keep homevideo1.mp4 (compressed version)
+# large media files (hosted on ImageKit CDN)
 /public/homevideo.mp4
 /public/homevideo1.mp4

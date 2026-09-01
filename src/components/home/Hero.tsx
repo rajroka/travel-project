@@ -32,7 +32,7 @@ export default function Hero() {
         playsInline
         className="absolute inset-0 h-full w-full object-cover object-center"
       >
-        <source src="/homevideo1.mp4" type="video/mp4" />
+        <source src="https://ik.imagekit.io/ankckbeex/travel-project/12786328_1920_1080_60fps%20(1).mp4" type="video/mp4" />
       </video>
 
       {/* Dark overlay */}
