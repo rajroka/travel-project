@@ -12,7 +12,6 @@ const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Destinations", href: "/destinations" },
   { label: "Packages", href: "/packages" },
-  { label: "AI Planner", href: "/ai-planner" },
   { label: "About", href: "/about" },
 ];
 

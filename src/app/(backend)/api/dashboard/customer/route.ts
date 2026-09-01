@@ -3,7 +3,6 @@ import { connectDB } from "@/lib/db/connection";
 import { Booking } from "@/lib/db/models/Booking";
 import { Payment } from "@/lib/db/models/Payment";
 import { Favorite } from "@/lib/db/models/Favorite";
-import { AITripPlan } from "@/lib/db/models/AITripPlan";
 import { Notification } from "@/lib/db/models/Notification";
 import { requireSession } from "@/lib/auth/session";
 import mongoose from "mongoose";
@@ -21,7 +20,6 @@ export async function GET(req: NextRequest) {
       bookingHistory,
       bookingStats,
       favoritesCount,
-      savedPlans,
       unreadNotifications,
       paymentHistory,
       pendingPayments,
@@ -51,12 +49,6 @@ export async function GET(req: NextRequest) {
       ]),
 
       Favorite.countDocuments({ user: session.userId }),
-
-      AITripPlan.find({ user: session.userId, isSaved: true })
-        .sort({ createdAt: -1 })
-        .limit(5)
-        .select("planName input createdAt")
-        .lean(),
 
       Notification.countDocuments({ user: session.userId, isRead: false }),
 
@@ -92,7 +84,6 @@ export async function GET(req: NextRequest) {
             cancelled: statsMap.cancelled ?? 0,
           },
           favoritesCount,
-          savedPlans,
           unreadNotifications,
           paymentHistory,
           pendingPayments,

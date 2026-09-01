@@ -12,7 +12,6 @@ import {
   Notification01Icon,
   CreditCardIcon,
   UserIcon,
-  StarIcon,
   Clock01Icon,
   DashboardSquare01Icon,
 } from "hugeicons-react";
@@ -23,7 +22,6 @@ const NAV_ITEMS = [
   { label: "My Bookings",    href: "/dashboard/bookings",       icon: Clock01Icon },
   { label: "Payments",       href: "/dashboard/payments",       icon: CreditCardIcon },
   { label: "Favourites",     href: "/dashboard/favorites",      icon: HeartCheckIcon },
-  { label: "AI Trip Plans",  href: "/dashboard/ai-plans",       icon: StarIcon },
   { label: "Notifications",  href: "/dashboard/notifications",  icon: Notification01Icon },
   { label: "Profile",        href: "/dashboard/profile",        icon: UserIcon },
 ];

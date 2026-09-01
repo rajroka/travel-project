@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { MapPinIcon, Calendar03Icon, UserGroupIcon, AiBeautifyIcon } from "hugeicons-react";
+import { MapPinIcon, Calendar03Icon, UserGroupIcon } from "hugeicons-react";
 
 const images = [
   "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=800&q=80",
@@ -81,14 +81,6 @@ export default function Hero() {
                 className="w-full outline-none text-sm text-gray-700 placeholder-gray-400"
               />
             </div>
-
-            <Link
-              href="/ai-planner"
-              className="flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-6 py-4 text-base font-semibold text-white transition hover:bg-blue-800"
-            >
-              <AiBeautifyIcon size={20} />
-              Generate My Plan
-            </Link>
           </div>
         </div>
       </div>
