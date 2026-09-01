@@ -24,16 +24,11 @@ export default function Hero() {
   return (
     <section className="relative h-[580px] overflow-hidden sm:h-[620px]">
 
-      {/* ── Background video ─────────────────────────────────────── */}
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="absolute inset-0 h-full w-full object-cover object-center"
-      >
-        <source src="https://ik.imagekit.io/ankckbeex/travel-project/12786328_1920_1080_60fps%20(1).mp4" type="video/mp4" />
-      </video>
+      {/* ── Background image ─────────────────────────────────────── */}
+      <div
+        className="absolute inset-0 h-full w-full bg-cover bg-center"
+        style={{ backgroundImage: 'url(/hero-image.jpg)' }}
+      />
 
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-black/50" />
