@@ -4,8 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import { FaStar } from "react-icons/fa";
 import {
   Search01Icon,
@@ -103,7 +101,6 @@ export default function SearchResults() {
 
   return (
     <>
-      <Navbar />
       <main className="mx-auto max-w-6xl px-6 py-10">
 
         {/* Search bar */}
@@ -288,7 +285,6 @@ export default function SearchResults() {
         )}
 
       </main>
-      <Footer />
     </>
   );
 }

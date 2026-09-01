@@ -4,8 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 import { Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import { FaStar } from "react-icons/fa";
 import {
   Search01Icon,
@@ -96,7 +94,6 @@ function DestinationsContent() {
 
   return (
     <>
-      <Navbar />
       <div className="min-h-screen bg-gray-50">
 
         {/* ── Hero ────────────────────────────────────────────────────── */}
@@ -296,7 +293,6 @@ function DestinationsContent() {
           </div>
         </div>
       </div>
-      <Footer />
     </>
   );
 }
