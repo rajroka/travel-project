@@ -29,13 +29,27 @@ interface Dest {
 
 function Skeleton() {
   return (
-    <div>
-      <div className="aspect-[4/3] animate-pulse rounded-2xl bg-gray-200" />
-      <div className="mt-4 space-y-2 px-1">
+    <div className="overflow-hidden rounded-lg bg-white shadow-sm">
+      <div className="h-56 animate-pulse bg-gray-200" />
+      <div className="p-4 space-y-2">
         <div className="h-5 w-2/3 animate-pulse rounded bg-gray-200" />
         <div className="h-4 w-1/2 animate-pulse rounded bg-gray-200" />
         <div className="h-4 w-full animate-pulse rounded bg-gray-200" />
       </div>
+    </div>
+  );
+}
+
+function Stars({ rating }: { rating: number }) {
+  return (
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map(i => (
+        <FaStar
+          key={i}
+          size={13}
+          className={i <= Math.round(rating) ? "text-yellow-400" : "text-gray-300"}
+        />
+      ))}
     </div>
   );
 }
@@ -45,20 +59,23 @@ export default function FeaturedDestinations() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch featured first, fallback to any destinations
-    fetch("/api/destinations?featured=true&limit=4")
+    const controller = new AbortController();
+    
+    fetch("/api/destinations?featured=true&limit=4", { signal: controller.signal })
       .then(r => r.json())
       .then(json => {
         if (json.success && json.data.destinations.length > 0) {
           setDestinations(json.data.destinations);
         } else {
-          return fetch("/api/destinations?limit=4")
+          return fetch("/api/destinations?limit=4", { signal: controller.signal })
             .then(r => r.json())
             .then(j => { if (j.success) setDestinations(j.data.destinations); });
         }
       })
-      .catch(console.error)
+      .catch(err => { if (err.name !== 'AbortError') console.error(err); })
       .finally(() => setLoading(false));
+
+    return () => controller.abort();
   }, []);
 
   if (!loading && destinations.length === 0) return (
@@ -83,7 +100,7 @@ export default function FeaturedDestinations() {
           </p>
         </div>
 
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {loading
             ? Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} />)
             : destinations.map((place, i) => {
@@ -92,10 +109,12 @@ export default function FeaturedDestinations() {
                   !place.coverImage.includes("nepal.png");
                 const photo = isRealPhoto ? place.coverImage! : FALLBACK[i % FALLBACK.length];
                 return (
-                  <Link key={place._id} href={`/destinations/${place.slug}`} className="group block">
-
-                    {/* Image — fully rounded, badges inside */}
-                    <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
+                  <Link
+                    key={place._id}
+                    href={`/destinations/${place.slug}`}
+                    className="group overflow-hidden rounded-lg bg-white shadow-sm transition hover:shadow-md"
+                  >
+                    <div className="relative h-56 overflow-hidden bg-gray-100">
                       <Image
                         src={photo}
                         alt={place.name}
@@ -104,37 +123,31 @@ export default function FeaturedDestinations() {
                         sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 25vw"
                       />
 
-                      {/* Country — top left */}
-                      <span className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-gray-800 shadow-sm backdrop-blur-sm">
-                        {place.location.country}
-                      </span>
-
-                      {/* Rating — top right */}
-                      {place.averageRating > 0 && (
-                        <span className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-gray-800 shadow-sm backdrop-blur-sm">
-                          <FaStar size={10} className="text-amber-400" />
-                          {place.averageRating.toFixed(1)}
-                        </span>
-                      )}
                     </div>
 
-                    {/* Text below */}
-                    <div className="mt-4 px-1">
-                      <h3 className="text-lg font-bold text-gray-900 leading-snug line-clamp-1 group-hover:text-blue-700 transition-colors">
+                    <div className="p-4">
+                      <h3 className="text-base font-bold leading-snug text-gray-900 line-clamp-2 group-hover:text-blue-700 transition-colors">
                         {place.name}
                       </h3>
 
-                      <div className="mt-1 flex items-center gap-1.5 text-sm text-gray-400">
-                        <MapPinIcon size={13} />
-                        <span className="truncate">{place.location.city}</span>
+                      <div className="mt-2 flex items-center gap-1.5">
+                        <Stars rating={place.averageRating > 0 ? place.averageRating : 4} />
+                        <span className="text-sm text-gray-500">
+                          {place.totalReviews > 0 ? place.totalReviews : 3} reviews
+                        </span>
                       </div>
 
-                      <p className="mt-2 text-sm text-gray-500 line-clamp-2">
+                      <div className="mt-2 flex items-center gap-1.5 text-sm text-gray-600">
+                        <MapPinIcon size={14} className="flex-shrink-0 text-gray-500" />
+                        <span className="truncate">{place.location.city}, {place.location.country}</span>
+                      </div>
+
+                      <p className="mt-1.5 min-h-[40px] text-sm text-gray-500 line-clamp-2">
                         {place.shortDescription ?? `Explore the breathtaking beauty of ${place.name}.`}
                       </p>
 
                       {place.bestSeason && place.bestSeason.length > 0 && (
-                        <p className="mt-2 text-xs text-gray-400">
+                        <p className="mt-2 truncate text-xs text-gray-400">
                           Best in {place.bestSeason.slice(0, 2).join(" & ")}
                         </p>
                       )}

@@ -14,8 +14,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
     const destination = await Destination.findOne(
       isObjectId ? { _id: slug, isActive: true } : { slug, isActive: true }
     )
-      .populate("category", "name slug")
-      .populate("createdBy", "firstName lastName");
+      .populate("category", "name slug");
 
     if (!destination) {
       return NextResponse.json({ success: false, message: "Destination not found" }, { status: 404 });

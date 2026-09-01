@@ -15,8 +15,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
       isObjectId ? { _id: slug, isActive: true } : { slug, isActive: true }
     )
       .populate("destination", "name slug location coverImage")
-      .populate("category", "name slug")
-      .populate("createdBy", "firstName lastName");
+      .populate("category", "name slug");
 
     if (!pkg) {
       return NextResponse.json({ success: false, message: "Package not found" }, { status: 404 });

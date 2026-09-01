@@ -1,89 +1,103 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
-import { MapPinIcon, Calendar03Icon, UserGroupIcon } from "hugeicons-react";
-
-const images = [
-  "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=800&q=80",
-  "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800&q=80",
-  "https://images.unsplash.com/photo-1528127269322-539801943592?w=800&q=80",
-  "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&q=80",
-  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&q=80",
-  "https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?w=800&q=80",
-];
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Search01Icon,
+  CheckmarkCircle01Icon,
+  Tag01Icon,
+} from "hugeicons-react";
 
 export default function Hero() {
+  const [query, setQuery] = useState("");
+  const router = useRouter();
+
+  function handleSearch(e: React.FormEvent) {
+    e.preventDefault();
+    if (query.trim()) {
+      router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+    } else {
+      router.push("/packages");
+    }
+  }
+
   return (
-    <section className="relative overflow-hidden">
-      {/* Background Images Grid */}
-      <div className="grid h-[650px] grid-cols-3 grid-rows-2">
-        {images.map((image, index) => (
-          <div key={index} className="relative h-full w-full">
-            <Image
-              src={image}
-              alt=""
-              fill
-              className="object-cover"
-              sizes="33vw"
-              priority={index < 3}
+    <section className="relative h-[580px] overflow-hidden sm:h-[620px]">
+
+      {/* ── Background video ─────────────────────────────────────── */}
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 h-full w-full object-cover object-center"
+      >
+        <source src="/homevideo.mp4" type="video/mp4" />
+      </video>
+
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-black/50" />
+
+      {/* ── Content ──────────────────────────────────────────────── */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
+
+        {/* Heading */}
+        <h1 className="max-w-2xl text-4xl font-extrabold leading-tight text-white drop-shadow-lg sm:text-5xl md:text-6xl">
+          Discover Nepal, Your Way
+        </h1>
+
+        {/* Sub */}
+        <p className="mx-auto mt-5 max-w-lg text-base leading-7 text-gray-200 sm:text-lg">
+          For over two generations, we&apos;ve been creating unforgettable trekking
+          and tour experiences across Nepal. From the Himalayas to hidden trails,
+          let us take you on your next adventure.
+        </p>
+
+        {/* ── Search bar ───────────────────────────────────────── */}
+        <form
+          onSubmit={handleSearch}
+          className="mt-8 flex w-full max-w-xl items-center gap-0 overflow-hidden rounded-full bg-white shadow-2xl"
+        >
+          <div className="flex flex-1 items-center gap-3 px-5">
+            <Search01Icon size={18} className="flex-shrink-0 text-gray-400" />
+            <input
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder="Search treks and tour packages…"
+              className="w-full bg-transparent py-4 text-sm text-gray-700 outline-none placeholder:text-gray-400"
             />
           </div>
-        ))}
-      </div>
+          <button
+            type="submit"
+            className="m-1.5 rounded-full bg-teal-500 px-7 py-3 text-sm font-bold text-white transition hover:bg-teal-600"
+          >
+            Search
+          </button>
+        </form>
 
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/60" />
-
-      {/* Content */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-full max-w-6xl px-6 text-center">
-          <span className="rounded-full bg-blue-600/80 px-5 py-2 text-sm font-semibold text-white">
-            🇳🇵 Explore Nepal Like Never Before
-          </span>
-
-          <h1 className="mt-6 text-5xl font-extrabold leading-tight text-white md:text-7xl">
-            Discover Nepal&apos;s
-            <br />
-            Hidden Wonders
-          </h1>
-
-          <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-gray-200">
-            Explore breathtaking mountains, serene lakes, rich culture,
-            and unforgettable adventures with our AI-powered travel planner.
-          </p>
-
-          {/* Search Box */}
-          <div className="mx-auto mt-12 grid max-w-5xl gap-3 rounded-2xl bg-white p-4 shadow-2xl md:grid-cols-4">
-            <div className="flex items-center gap-3 rounded-xl border border-gray-200 p-4">
-              <MapPinIcon size={20} className="text-blue-600 flex-shrink-0" />
-              <input
-                type="text"
-                placeholder="Destination"
-                className="w-full outline-none text-sm text-gray-700 placeholder-gray-400"
-              />
-            </div>
-
-            <div className="flex items-center gap-3 rounded-xl border border-gray-200 p-4">
-              <Calendar03Icon size={20} className="text-blue-600 flex-shrink-0" />
-              <input
-                type="date"
-                className="w-full outline-none text-sm text-gray-700 placeholder-gray-400"
-              />
-            </div>
-
-            <div className="flex items-center gap-3 rounded-xl border border-gray-200 p-4">
-              <UserGroupIcon size={20} className="text-blue-600 flex-shrink-0" />
-              <input
-                type="number"
-                min={1}
-                placeholder="Travelers"
-                className="w-full outline-none text-sm text-gray-700 placeholder-gray-400"
-              />
-            </div>
-          </div>
+        {/* ── Feature pills ────────────────────────────────────── */}
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <Pill
+            icon={
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 20l5-10 4 6 3-4 6 8H3z"/>
+              </svg>
+            }
+            label="Himalayan Experts"
+          />
+          <Pill icon={<CheckmarkCircle01Icon size={16} />} label="Hassle-Free Travel" />
+          <Pill icon={<Tag01Icon size={16} />} label="Best Price" />
         </div>
       </div>
     </section>
+  );
+}
+
+function Pill({ icon, label }: { icon: React.ReactNode; label: string }) {
+  return (
+    <div className="flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur-sm">
+      {icon}
+      {label}
+    </div>
   );
 }

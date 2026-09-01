@@ -291,7 +291,7 @@ function PackagesContent() {
                       className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
                     >
                       {/* Image */}
-                      <div className="relative h-48 bg-gradient-to-br from-green-100 to-teal-200">
+                      <div className="relative h-48 bg-gray-100">
                         {pkg.coverImage ? (
                           <Image src={pkg.coverImage} alt={pkg.title} fill className="object-cover transition group-hover:scale-105" sizes="(max-width:640px) 100vw, 33vw" />
                         ) : (

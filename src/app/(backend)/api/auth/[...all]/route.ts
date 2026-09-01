@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth/better-auth";
+import { toNextJsHandler } from "better-auth/next-js";
 
 /**
  * Better Auth catch-all handler.
@@ -13,10 +14,4 @@ import { auth } from "@/lib/auth/better-auth";
  *   GET  /api/auth/verify-email
  *   GET  /api/auth/get-session
  */
-export async function GET(req: Request) {
-  return auth.handler(req);
-}
-
-export async function POST(req: Request) {
-  return auth.handler(req);
-}
+export const { GET, POST, PATCH, PUT, DELETE } = toNextJsHandler(auth);

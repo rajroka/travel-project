@@ -22,14 +22,14 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const { page, limit, packageId, hidden, minRating, maxRating, sort } = parsed.data;
+    const { page, limit, packageId, destinationId, hidden, minRating, maxRating, sort } = parsed.data;
     const { skip } = paginate(page, limit);
 
     const filter: Record<string, unknown> = {};
-    // Public consumers only see visible reviews
     if (hidden === undefined) filter.isHidden = false;
     else filter.isHidden = hidden;
     if (packageId) filter.package = packageId;
+    if (destinationId) filter.destination = destinationId;
     if (minRating !== undefined || maxRating !== undefined) {
       filter.rating = {};
       if (minRating !== undefined) (filter.rating as Record<string, number>).$gte = minRating;
@@ -79,12 +79,52 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { bookingId, packageId, rating, title, comment, photos } = parsed.data;
+    const { bookingId, packageId, destinationId, rating, title, comment, photos } = parsed.data;
+
+    // Destination review — no booking required
+    if (destinationId && !packageId && !bookingId) {
+      const { resolveMongoUser } = await import("@/lib/auth/resolve-user");
+      const mongoUser = await resolveMongoUser(session);
+
+      // One review per user per destination
+      const existing = await Review.findOne({ destination: destinationId, user: mongoUser._id });
+      if (existing) {
+        return NextResponse.json({ success: false, message: "You have already reviewed this destination" }, { status: 409 });
+      }
+
+      const review = await Review.create({
+        user: mongoUser._id,
+        destination: destinationId,
+        rating, title, comment, photos,
+        isVerified: false,
+      });
+
+      const populated = await review.populate("user", "firstName lastName");
+
+      // Update destination rating
+      const { Destination } = await import("@/lib/db/models/Destination");
+      const stats = await Review.aggregate([
+        { $match: { destination: review.destination, isHidden: false } },
+        { $group: { _id: null, avgRating: { $avg: "$rating" }, count: { $sum: 1 } } },
+      ]);
+      if (stats.length > 0) {
+        await Destination.findByIdAndUpdate(destinationId, {
+          averageRating: Math.round(stats[0].avgRating * 10) / 10,
+          totalReviews: stats[0].count,
+        });
+      }
+
+      return NextResponse.json({ success: true, message: "Review submitted", data: { review: populated } }, { status: 201 });
+    }
+
+    // Package / booking review — requires completed booking
+    const { resolveMongoUser } = await import("@/lib/auth/resolve-user");
+    const mongoUser = await resolveMongoUser(session);
 
     // Verify booking belongs to user and is completed
     const booking = await Booking.findOne({
       _id: bookingId,
-      user: session.userId,
+      user: mongoUser._id,
       status: "completed",
     });
     if (!booking) {
@@ -95,7 +135,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Check duplicate
-    const existing = await Review.findOne({ booking: bookingId, user: session.userId });
+    const existing = await Review.findOne({ booking: bookingId, user: mongoUser._id });
     if (existing) {
       return NextResponse.json(
         { success: false, message: "You have already reviewed this booking" },
@@ -104,13 +144,10 @@ export async function POST(req: NextRequest) {
     }
 
     const review = await Review.create({
-      user: session.userId,
+      user: mongoUser._id,
       package: packageId,
       booking: bookingId,
-      rating,
-      title,
-      comment,
-      photos,
+      rating, title, comment, photos,
       isVerified: true,
     });
 
