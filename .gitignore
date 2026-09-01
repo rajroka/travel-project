@@ -41,4 +41,5 @@ yarn-error.log*
 next-env.d.ts
 
 # large media files - keep homevideo1.mp4 (compressed version)
-public/homevideo.mp4
+/public/homevideo.mp4
+/public/homevideo1.mp4
