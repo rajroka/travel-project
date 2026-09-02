@@ -12,6 +12,7 @@ import {
   Cancel01Icon,
   Clock01Icon,
 } from "hugeicons-react";
+import { formatUserName } from "@/lib/utils/formatters";
 
 interface Booking {
   _id: string;
@@ -151,7 +152,7 @@ export default function StaffBookingDetailPage() {
           <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
             <h2 className="mb-4 font-semibold text-gray-900">Customer</h2>
             <div className="space-y-2 text-sm text-gray-700">
-              <p className="font-medium">{booking.user.firstName} {booking.user.lastName}</p>
+              <p className="font-medium">{formatUserName(booking.user)}</p>
               <p className="text-gray-500">{booking.user.email}</p>
               {booking.user.phone && <p className="text-gray-500">{booking.user.phone}</p>}
             </div>

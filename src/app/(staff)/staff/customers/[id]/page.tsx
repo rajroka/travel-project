@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft01Icon, Calendar03Icon, CreditCardIcon, UserAccountIcon } from "hugeicons-react";
+import { formatUserName } from "@/lib/utils/formatters";
 
 interface Customer {
   _id: string;
@@ -65,7 +66,7 @@ export default function StaffCustomerDetailPage() {
                 <UserAccountIcon size={24} className="text-blue-700" />
               </div>
               <div>
-                <h2 className="font-bold text-gray-900">{customer.firstName} {customer.lastName}</h2>
+                <h2 className="font-bold text-gray-900">{formatUserName(customer)}</h2>
                 <p className="text-sm text-gray-500">{customer.email}</p>
               </div>
             </div>

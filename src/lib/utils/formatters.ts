@@ -51,3 +51,41 @@ export function capitalize(text: string): string {
   if (!text) return "";
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
+
+type NameFields = {
+  name?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+};
+
+function dedupeConsecutiveWords(name: string): string {
+  const parts = name.split(/\s+/).filter(Boolean);
+  const out: string[] = [];
+  for (const part of parts) {
+    if (out.length && out[out.length - 1]!.toLowerCase() === part.toLowerCase()) continue;
+    out.push(part);
+  }
+  return out.join(" ");
+}
+
+/** Display a person's name once (skips a last name that repeats the first). */
+export function formatUserName(user?: NameFields | null, fallback = "—"): string {
+  if (!user) return fallback;
+
+  const first = user.firstName?.trim() ?? "";
+  const last = user.lastName?.trim() ?? "";
+
+  if (first || last) {
+    if (!last || first.toLowerCase() === last.toLowerCase()) {
+      return first || last || fallback;
+    }
+    return `${first} ${last}`;
+  }
+
+  if (user.name?.trim()) {
+    return dedupeConsecutiveWords(user.name.trim()) || fallback;
+  }
+
+  return user.email?.split("@")[0] || fallback;
+}

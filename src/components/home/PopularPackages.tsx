@@ -8,12 +8,11 @@ import { MapPinIcon, ArrowRight01Icon } from "hugeicons-react";
 import { FiDollarSign } from "react-icons/fi";
 
 const FALLBACK = [
-  "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800&q=80",
-  "https://images.unsplash.com/photo-1605640840605-14ac1855827b?w=800&q=80",
-  "https://images.unsplash.com/photo-1507743617593-0a422c9bb7f5?w=800&q=80",
-  "https://images.unsplash.com/photo-1570637020039-e3a81f33d027?w=800&q=80",
-  "https://images.unsplash.com/photo-1585016495481-91613d49c5fb?w=800&q=80",
-  "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
+  "/pexels-tkirkgoz-4750098.jpg",
+  "/pexels-roman-saienko-1867764487-28831413.jpg",
+  "/pexels-mr-dr3igeteilt-2159455987-36564643.jpg",
+  "/gumba.jpg",
+  "/hero-image.jpg",
 ];
 
 interface Pkg {
@@ -71,14 +70,25 @@ export default function PopularPackages() {
       .then(json => {
         if (json.success && json.data.packages.length > 0) {
           setPackages(json.data.packages);
+          setLoading(false);
         } else {
+          // Fallback fetch
           fetch("/api/packages?limit=6", { signal: controller.signal })
             .then(r => r.json())
-            .then(j => { if (j.success) setPackages(j.data.packages); });
+            .then(j => { 
+              if (j.success) setPackages(j.data.packages);
+              setLoading(false);
+            })
+            .catch(err => { 
+              if (err.name !== 'AbortError') console.error(err);
+              setLoading(false);
+            });
         }
       })
-      .catch(err => { if (err.name !== 'AbortError') console.error(err); })
-      .finally(() => setLoading(false));
+      .catch(err => { 
+        if (err.name !== 'AbortError') console.error(err);
+        setLoading(false);
+      });
 
     return () => controller.abort();
   }, []);
@@ -163,28 +173,30 @@ function PackageCard({ pkg, index, displayPrice }: { pkg: Pkg; index: number; di
       {/* Content */}
       <div className="p-4">
         {/* Title */}
-        <h3 className="text-base font-bold leading-snug text-gray-900 line-clamp-2 group-hover:text-blue-700 transition-colors">
+        <h3 className="break-words text-base font-bold leading-snug text-gray-900 line-clamp-2 group-hover:text-blue-700 transition-colors">
           {pkg.title}
         </h3>
 
         {/* Stars + reviews */}
         <div className="mt-2 flex items-center gap-1.5">
-          <Stars rating={pkg.averageRating > 0 ? pkg.averageRating : 4} />
-          <span className="text-sm text-gray-500">
-            {pkg.totalReviews > 0 ? pkg.totalReviews : 3} reviews
-          </span>
+          <Stars rating={pkg.averageRating > 0 ? pkg.averageRating : 0} />
+          {pkg.averageRating > 0 && (
+            <span className="text-sm text-gray-500">
+              {pkg.totalReviews} {pkg.totalReviews === 1 ? 'review' : 'reviews'}
+            </span>
+          )}
         </div>
 
         {/* Duration */}
-        <div className="mt-2 flex items-center gap-1.5 text-sm text-gray-600">
+        <div className="mt-2 flex items-center gap-1.5 text-sm text-gray-600 truncate">
           <MapPinIcon size={14} className="flex-shrink-0 text-gray-500" />
-          Duration: {pkg.duration.days} days
+          <span className="truncate">Duration: {pkg.duration.days} days</span>
         </div>
 
         {/* Price */}
-        <div className="mt-1.5 flex items-center gap-1.5 text-sm font-medium text-gray-700">
+        <div className="mt-1.5 flex items-center gap-1.5 text-sm font-medium text-gray-700 truncate">
           <FiDollarSign size={14} className="flex-shrink-0 text-gray-500" />
-          Starting From: USD {displayPrice.toLocaleString()}
+          <span className="truncate">Starting From: USD {displayPrice.toLocaleString()}</span>
         </div>
       </div>
     </Link>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { UserGroupIcon } from "hugeicons-react";
+import { formatUserName } from "@/lib/utils/formatters";
 
 interface Customer {
   _id: string;
@@ -33,7 +34,7 @@ export default function StaffCustomersPage() {
   useEffect(() => { fetchCustomers(""); }, []);
 
   function getName(c: Customer): string {
-    return (c.name ?? [c.firstName, c.lastName].filter(Boolean).join(" ")) || c.email;
+    return formatUserName(c);
   }
 
   return (

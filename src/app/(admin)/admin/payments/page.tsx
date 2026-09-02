@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { CreditCardIcon } from "hugeicons-react";
+import { formatUserName } from "@/lib/utils/formatters";
 
 interface Payment {
   _id: string;
@@ -22,9 +23,7 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 function getUserName(user: { name?: string; firstName?: string; lastName?: string; email: string }): string {
-  if (user?.name) return user.name;
-  const full = `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim();
-  return full || user?.email || "—";
+  return formatUserName(user);
 }
 
 export default function AdminPaymentsPage() {

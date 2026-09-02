@@ -7,12 +7,11 @@ import { FaStar } from "react-icons/fa";
 import { MapPinIcon, ArrowRight01Icon } from "hugeicons-react";
 
 const FALLBACK = [
-  "https://images.unsplash.com/photo-1605640840605-14ac1855827b?w=900&q=85", // Everest
-  "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=900&q=85",    // Annapurna
-  "https://images.unsplash.com/photo-1507743617593-0a422c9bb7f5?w=900&q=85", // Pokhara
-  "https://images.unsplash.com/photo-1570637020039-e3a81f33d027?w=900&q=85", // Kathmandu temple
-  "https://images.unsplash.com/photo-1585016495481-91613d49c5fb?w=900&q=85", // Himalaya range
-  "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=85",    // Nepal valley
+  "/pexels-tkirkgoz-4750098.jpg",
+  "/pexels-roman-saienko-1867764487-28831413.jpg",
+  "/pexels-mr-dr3igeteilt-2159455987-36564643.jpg",
+  "/gumba.jpg",
+  "/hero-image.jpg",
 ];
 
 interface Dest {
@@ -66,14 +65,21 @@ export default function FeaturedDestinations() {
       .then(json => {
         if (json.success && json.data.destinations.length > 0) {
           setDestinations(json.data.destinations);
+          setLoading(false);
         } else {
+          // Fallback fetch
           return fetch("/api/destinations?limit=4", { signal: controller.signal })
             .then(r => r.json())
-            .then(j => { if (j.success) setDestinations(j.data.destinations); });
+            .then(j => { 
+              if (j.success) setDestinations(j.data.destinations);
+              setLoading(false);
+            });
         }
       })
-      .catch(err => { if (err.name !== 'AbortError') console.error(err); })
-      .finally(() => setLoading(false));
+      .catch(err => { 
+        if (err.name !== 'AbortError') console.error(err);
+        setLoading(false);
+      });
 
     return () => controller.abort();
   }, []);
@@ -126,15 +132,17 @@ export default function FeaturedDestinations() {
                     </div>
 
                     <div className="p-4">
-                      <h3 className="text-base font-bold leading-snug text-gray-900 line-clamp-2 group-hover:text-blue-700 transition-colors">
+                      <h3 className="break-words text-base font-bold leading-snug text-gray-900 line-clamp-2 group-hover:text-blue-700 transition-colors">
                         {place.name}
                       </h3>
 
                       <div className="mt-2 flex items-center gap-1.5">
-                        <Stars rating={place.averageRating > 0 ? place.averageRating : 4} />
-                        <span className="text-sm text-gray-500">
-                          {place.totalReviews > 0 ? place.totalReviews : 3} reviews
-                        </span>
+                        <Stars rating={place.averageRating > 0 ? place.averageRating : 0} />
+                        {place.averageRating > 0 && (
+                          <span className="text-sm text-gray-500">
+                            {place.totalReviews} {place.totalReviews === 1 ? 'review' : 'reviews'}
+                          </span>
+                        )}
                       </div>
 
                       <div className="mt-2 flex items-center gap-1.5 text-sm text-gray-600">

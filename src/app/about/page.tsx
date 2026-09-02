@@ -40,10 +40,10 @@ const values = [
 ];
 
 const team = [
-  { name: "Arjun Sharma",   role: "Founder & CEO",         img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80" },
-  { name: "Priya Thapa",    role: "Head of Operations",    img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80" },
-  { name: "Bikash Gurung",  role: "Lead Tour Guide",       img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80" },
-  { name: "Sita Rai",       role: "Customer Experience",   img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&q=80" },
+  { name: "Raj Roka",           role: "Developer",         img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80" },
+  { name: "Laxman Bashyal",     role: "Developer",         img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80" },
+  { name: "Samikshya Subedi",   role: "Developer",         img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80" },
+  { name: "Aaditya Thapa",      role: "Developer",         img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80" },
 ];
 
 export default function AboutPage() {
@@ -51,23 +51,26 @@ export default function AboutPage() {
     <div className="min-h-screen bg-white">
 
       {/* ── Hero ─────────────────────────────────────────────────────── */}
-      <section className="relative h-80 overflow-hidden bg-blue-900 sm:h-96">
+      <section className="relative h-80 overflow-hidden sm:h-96">
         <Image
-          src="https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=1600&q=80"
+          src="/about.jpg"
           alt="Nepal mountains"
           fill
-          className="object-cover opacity-40"
+          className="object-cover"
           sizes="100vw"
           priority
         />
+        {/* Light dark overlay */}
+        <div className="absolute inset-0 bg-black/30" />
+        
         <div className="relative flex h-full flex-col items-center justify-center px-6 text-center">
-          <span className="mb-4 rounded-full bg-white/20 px-4 py-1.5 text-sm font-semibold text-white backdrop-blur-sm">
+          <span className="mb-4 rounded-full bg-white/90 px-4 py-1.5 text-sm font-semibold text-teal-600 backdrop-blur-sm">
             About Us
           </span>
           <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
             Your Nepal Travel Experts
           </h1>
-          <p className="mt-4 max-w-xl text-base text-gray-200">
+          <p className="mt-4 max-w-xl text-base text-white">
             We connect travelers with Nepal&apos;s most breathtaking destinations through
             carefully crafted tour packages and dedicated support.
           </p>
@@ -150,7 +153,7 @@ export default function AboutPage() {
       </section>
 
       {/* ── Team ─────────────────────────────────────────────────────── */}
-      <section className="py-20">
+      <section id="team" className="py-20">
         <div className="mx-auto max-w-5xl px-6">
           <div className="mb-12 text-center">
             <p className="text-sm font-bold uppercase tracking-widest text-blue-700">The People Behind It</p>

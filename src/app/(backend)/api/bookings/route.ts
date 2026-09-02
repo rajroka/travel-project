@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const { page, limit, status, paymentStatus, startDate, endDate, search, sort } = parsed.data;
+    const { page, limit, status, paymentStatus, packageId, destinationId, startDate, endDate, search, sort } = parsed.data;
     const { skip } = paginate(page, limit);
 
     const filter: Record<string, unknown> = {};
@@ -41,7 +41,39 @@ export async function GET(req: NextRequest) {
 
     if (status) filter.status = status;
     if (paymentStatus) filter.paymentStatus = paymentStatus;
-    if (search) filter.bookingNumber = { $regex: search, $options: "i" };
+    if (packageId) filter.package = packageId;
+
+    if (destinationId) {
+      const destPackages = await TourPackage.find({ destination: destinationId }).select("_id").lean();
+      filter.package = { $in: destPackages.map((p) => p._id) };
+      if (packageId) filter.package = packageId;
+    }
+
+    if (search) {
+      if (session.role === "customer") {
+        filter.bookingNumber = { $regex: search, $options: "i" };
+      } else {
+        const matchedUsers = await User.find({
+          $or: [
+            { firstName: { $regex: search, $options: "i" } },
+            { lastName: { $regex: search, $options: "i" } },
+            { email: { $regex: search, $options: "i" } },
+            { phone: { $regex: search, $options: "i" } },
+          ],
+        }).select("_id").lean();
+
+        const matchedPackages = await TourPackage.find({
+          title: { $regex: search, $options: "i" },
+        }).select("_id").lean();
+
+        filter.$or = [
+          { bookingNumber: { $regex: search, $options: "i" } },
+          { user: { $in: matchedUsers.map((u) => u._id) } },
+          { package: { $in: matchedPackages.map((p) => p._id) } },
+        ];
+      }
+    }
+
     if (startDate || endDate) {
       filter.travelDate = {};
       if (startDate) (filter.travelDate as Record<string, Date>).$gte = new Date(startDate);
@@ -52,6 +84,8 @@ export async function GET(req: NextRequest) {
       newest: { createdAt: -1 },
       oldest: { createdAt: 1 },
       travel_date: { travelDate: 1 },
+      amount_high: { totalAmount: -1 },
+      amount_low: { totalAmount: 1 },
     };
 
     const [bookings, total] = await Promise.all([

@@ -33,6 +33,7 @@ interface Review {
   title?: string;
   comment: string;
   createdAt: string;
+  adminResponse?: { comment: string };
 }
 
 type SessionUser = { name?: string | null; email?: string | null; image?: string | null; role?: string };
@@ -78,8 +79,11 @@ export default function DestinationDetailPage() {
   const [submitting, setSubmitting] = useState(false);
   const [reviewError, setReviewError] = useState("");
   const [reviewSuccess, setReviewSuccess] = useState(false);
+  const [responding, setResponding] = useState<string | null>(null);
+  const [responseText, setResponseText] = useState("");
 
   const isCustomer = user?.role === "user";
+  const isStaffOrAdmin = user?.role === "admin" || user?.role === "staff";
 
   useEffect(() => {
     const controller = new AbortController();
@@ -222,8 +226,8 @@ export default function DestinationDetailPage() {
 
             {/* About */}
             <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-              <h2 className="mb-3 font-semibold text-gray-900">About {dest.name}</h2>
-              <p className="leading-7 text-gray-600">{dest.description}</p>
+              <h2 className="mb-3 break-words font-semibold text-gray-900">About {dest.name}</h2>
+              <p className="break-words leading-7 text-gray-600">{dest.description}</p>
             </div>
 
             {/* Highlights */}
@@ -260,8 +264,8 @@ export default function DestinationDetailPage() {
                         }
                       </div>
                       <div className="p-3">
-                        <p className="text-sm font-semibold text-gray-900 line-clamp-1">{pkg.title}</p>
-                        <p className="mt-0.5 text-xs text-gray-500">{pkg.duration.days}D · ${pkg.discountPrice ?? pkg.price}</p>
+                        <p className="break-words text-sm font-semibold text-gray-900 line-clamp-2">{pkg.title}</p>
+                        <p className="mt-0.5 text-xs text-gray-500 truncate">{pkg.duration.days}D · ${pkg.discountPrice ?? pkg.price}</p>
                       </div>
                     </Link>
                   ))}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Calendar03Icon } from "hugeicons-react";
+import { formatUserName } from "@/lib/utils/formatters";
 
 interface Booking {
   _id: string;
@@ -23,7 +24,7 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 function getName(u?: { name?: string; email: string }): string {
-  return u?.name ?? u?.email ?? "—";
+  return formatUserName(u);
 }
 
 export default function StaffBookingsPage() {

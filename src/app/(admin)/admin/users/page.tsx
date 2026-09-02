@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { UserGroupIcon } from "hugeicons-react";
+import { formatUserName } from "@/lib/utils/formatters";
 
 interface User {
   _id: string;
@@ -23,8 +24,7 @@ const ROLE_STYLES: Record<string, string> = {
 };
 
 function getUserName(user: { name?: string; firstName?: string; lastName?: string }): string {
-  if (user?.name) return user.name;
-  return `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim() || "—";
+  return formatUserName(user);
 }
 
 export default function AdminUsersPage() {

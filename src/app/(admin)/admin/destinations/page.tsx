@@ -1,17 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import {
   MapPinIcon,
-  Delete01Icon,
-  PencilEdit01Icon,
   Add01Icon,
   Cancel01Icon,
   FloppyDiskIcon,
 } from "hugeicons-react";
-import { FaStar } from "react-icons/fa";
 import ImageUpload from "@/components/ui/ImageUpload";
+import DestinationManageCard, {
+  DestinationManageCardSkeleton,
+} from "@/components/destinations/DestinationManageCard";
 
 interface Destination {
   _id: string;
@@ -221,7 +220,7 @@ export default function AdminDestinationsPage() {
       {loading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-52 animate-pulse rounded-2xl bg-gray-100" />
+            <DestinationManageCardSkeleton key={i} />
           ))}
         </div>
       ) : destinations.length === 0 ? (
@@ -231,62 +230,16 @@ export default function AdminDestinationsPage() {
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {destinations.map(d => (
-            <div key={d._id} className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-              <div className="relative h-40 bg-gradient-to-br from-blue-100 to-indigo-200">
-                {d.coverImage ? (
-                  <Image src={d.coverImage} alt={d.name} fill className="object-cover" sizes="33vw" />
-                ) : (
-                  <div className="flex h-full items-center justify-center">
-                    <MapPinIcon size={40} className="text-blue-300" />
-                  </div>
-                )}
-                {d.isFeatured && (
-                  <span className="absolute left-2 top-2 rounded-full bg-yellow-400 px-2 py-0.5 text-xs font-semibold text-white shadow">
-                    Featured
-                  </span>
-                )}
-              </div>
-              <div className="p-4">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <h3 className="truncate font-semibold text-gray-900">{d.name}</h3>
-                    <p className="text-xs text-gray-400">{d.location.city}, {d.location.country}</p>
-                    {d.averageRating > 0 && (
-                      <span className="mt-1 flex items-center gap-1 text-xs text-gray-500">
-                        <FaStar size={10} className="text-amber-400" /> {d.averageRating.toFixed(1)} ({d.totalReviews})
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex flex-shrink-0 gap-1">
-                    <button
-                      onClick={() => toggleFeatured(d)}
-                      title={d.isFeatured ? "Unfeature" : "Feature"}
-                      className={`rounded-lg px-2 py-1 text-xs font-semibold transition ${
-                        d.isFeatured
-                          ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
-                          : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-                      }`}
-                    >
-                      {d.isFeatured ? "★" : "☆"}
-                    </button>
-                    <button
-                      onClick={() => openEdit(d)}
-                      className="rounded-lg p-1.5 text-gray-400 transition hover:bg-blue-50 hover:text-blue-600"
-                    >
-                      <PencilEdit01Icon size={15} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(d.slug)}
-                      disabled={deleting === d.slug}
-                      className="rounded-lg p-1.5 text-gray-400 transition hover:bg-red-50 hover:text-red-500 disabled:opacity-40"
-                    >
-                      <Delete01Icon size={15} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+          {destinations.map((d, i) => (
+            <DestinationManageCard
+              key={d._id}
+              destination={d}
+              index={i}
+              deleting={deleting === d.slug}
+              onEdit={() => openEdit(d)}
+              onDelete={() => handleDelete(d.slug)}
+              onToggleFeatured={() => toggleFeatured(d)}
+            />
           ))}
         </div>
       )}

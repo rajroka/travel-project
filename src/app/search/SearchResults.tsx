@@ -19,7 +19,9 @@ interface Destination {
   coverImage?: string;
   location: { city: string; country: string };
   averageRating: number;
+  totalReviews: number;
   shortDescription?: string;
+  bestSeason?: string[];
 }
 
 interface Package {
@@ -31,6 +33,7 @@ interface Package {
   discountPrice?: number;
   duration: { days: number; nights: number };
   averageRating: number;
+  totalReviews: number;
   destination?: { name: string };
 }
 
@@ -192,11 +195,11 @@ export default function SearchResults() {
                 <Link
                   key={d._id}
                   href={`/destinations/${d.slug}`}
-                  className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:shadow-md"
+                  className="group overflow-hidden rounded-lg bg-white shadow-sm transition hover:shadow-md"
                 >
-                  <div className="relative h-40 bg-gradient-to-br from-blue-100 to-indigo-200">
+                  <div className="relative h-56 overflow-hidden bg-gray-100">
                     {d.coverImage ? (
-                      <Image src={d.coverImage} alt={d.name} fill className="object-cover transition group-hover:scale-105" sizes="33vw" />
+                      <Image src={d.coverImage} alt={d.name} fill className="object-cover transition duration-500 group-hover:scale-105" sizes="33vw" />
                     ) : (
                       <div className="flex h-full items-center justify-center">
                         <MapPinIcon size={48} className="text-blue-300" />
@@ -204,16 +207,34 @@ export default function SearchResults() {
                     )}
                   </div>
                   <div className="p-4">
-                    <h3 className="font-semibold text-gray-900">{d.name}</h3>
-                    <p className="mt-0.5 flex items-center gap-1 text-sm text-gray-400">
-                      <Location01Icon size={13} className="text-blue-400" />
-                      {d.location.city}, {d.location.country}
+                    <h3 className="break-words text-base font-bold leading-snug text-gray-900 line-clamp-2 group-hover:text-blue-700 transition-colors">
+                      {d.name}
+                    </h3>
+
+                    <div className="mt-2 flex items-center gap-1.5">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <FaStar key={star} size={12} className={d.averageRating >= star ? "text-amber-400" : "text-gray-300"} />
+                      ))}
+                      {d.averageRating > 0 && (
+                        <span className="text-sm text-gray-500">
+                          {d.totalReviews} {d.totalReviews === 1 ? 'review' : 'reviews'}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="mt-2 flex items-center gap-1.5 text-sm text-gray-600">
+                      <MapPinIcon size={14} className="flex-shrink-0 text-gray-500" />
+                      <span className="truncate">{d.location.city}, {d.location.country}</span>
+                    </div>
+
+                    <p className="mt-1.5 min-h-[40px] text-sm text-gray-500 line-clamp-2">
+                      {d.shortDescription ?? `Explore the breathtaking beauty of ${d.name}.`}
                     </p>
-                    {d.averageRating > 0 && (
-                      <div className="mt-2 flex items-center gap-1 text-sm">
-                        <FaStar size={12} className="text-amber-400" />
-                        <span className="font-medium text-gray-700">{d.averageRating.toFixed(1)}</span>
-                      </div>
+
+                    {d.bestSeason && d.bestSeason.length > 0 && (
+                      <p className="mt-2 truncate text-xs text-gray-400">
+                        Best in {d.bestSeason.slice(0, 2).join(" & ")}
+                      </p>
                     )}
                   </div>
                 </Link>
@@ -233,11 +254,11 @@ export default function SearchResults() {
                 <Link
                   key={p._id}
                   href={`/packages/${p.slug}`}
-                  className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:shadow-md"
+                  className="group overflow-hidden rounded-lg bg-white shadow-sm transition hover:shadow-md"
                 >
-                  <div className="relative h-40 bg-gradient-to-br from-green-100 to-teal-200">
+                  <div className="relative h-56 overflow-hidden bg-gray-100">
                     {p.coverImage ? (
-                      <Image src={p.coverImage} alt={p.title} fill className="object-cover transition group-hover:scale-105" sizes="33vw" />
+                      <Image src={p.coverImage} alt={p.title} fill className="object-cover transition duration-500 group-hover:scale-105" sizes="33vw" />
                     ) : (
                       <div className="flex h-full items-center justify-center">
                         <Clock01Icon size={48} className="text-green-300" />
@@ -248,34 +269,36 @@ export default function SearchResults() {
                     )}
                   </div>
                   <div className="p-4">
-                    <h3 className="line-clamp-1 font-semibold text-gray-900">{p.title}</h3>
-                    {p.destination && (
-                      <p className="mt-0.5 flex items-center gap-1 text-sm text-gray-400">
-                        <Location01Icon size={13} className="text-blue-400" />
-                        {p.destination.name}
-                      </p>
-                    )}
-                    <div className="mt-3 flex items-center justify-between">
-                      <div>
-                        {p.discountPrice ? (
-                          <span className="font-bold text-gray-900">
-                            ${p.discountPrice} <span className="text-xs font-normal text-gray-400 line-through">${p.price}</span>
-                          </span>
-                        ) : (
-                          <span className="font-bold text-gray-900">${p.price}</span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-3 text-xs text-gray-400">
-                        <span className="flex items-center gap-1">
-                          <Clock01Icon size={13} />{p.duration.days}D
+                    <h3 className="break-words text-base font-bold leading-snug text-gray-900 line-clamp-2 group-hover:text-blue-700 transition-colors">
+                      {p.title}
+                    </h3>
+
+                    <div className="mt-2 flex items-center gap-1.5">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <FaStar key={star} size={12} className={p.averageRating >= star ? "text-amber-400" : "text-gray-300"} />
+                      ))}
+                      {p.averageRating > 0 && (
+                        <span className="text-sm text-gray-500">
+                          {p.totalReviews} {p.totalReviews === 1 ? 'review' : 'reviews'}
                         </span>
-                        {p.averageRating > 0 && (
-                          <span className="flex items-center gap-1">
-                            <FaStar size={11} className="text-amber-400" />
-                            <span className="text-gray-600">{p.averageRating.toFixed(1)}</span>
-                          </span>
-                        )}
-                      </div>
+                      )}
+                    </div>
+
+                    <div className="mt-2 flex items-center gap-1.5 text-sm text-gray-600">
+                      <Clock01Icon size={14} className="flex-shrink-0 text-gray-500" />
+                      <span className="truncate">Duration: {p.duration.days} days</span>
+                    </div>
+
+                    <div className="mt-1.5 flex items-center gap-2 text-sm font-medium text-gray-700">
+                      <span className="text-gray-500">Starting From:</span>
+                      {p.discountPrice ? (
+                        <>
+                          <span className="font-bold text-gray-900">USD {p.discountPrice}</span>
+                          <span className="text-xs text-gray-400 line-through">USD {p.price}</span>
+                        </>
+                      ) : (
+                        <span className="font-bold text-gray-900">USD {p.price}</span>
+                      )}
                     </div>
                   </div>
                 </Link>

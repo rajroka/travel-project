@@ -13,8 +13,7 @@ export async function resolveMongoUser(session: AppSession) {
     const emailPrefix = session.email.split("@")[0] ?? "user";
     const parts = emailPrefix.split(/[._-]/);
     const firstName = capitalize(parts[0] ?? "User");
-    // lastName must be non-empty per schema — use email prefix if no last name found
-    const lastName = parts.length > 1 ? capitalize(parts[1]) : capitalize(emailPrefix);
+    const lastName = parts.length > 1 ? capitalize(parts[1]) : "";
 
     user = await User.create({
       firstName,

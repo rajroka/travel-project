@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Calendar03Icon, CreditCardIcon, ArrowRight01Icon, Clock01Icon } from "hugeicons-react";
+import { formatUserName } from "@/lib/utils/formatters";
 
 interface DashboardUser {
   name?: string;
@@ -32,8 +33,7 @@ interface StaffData {
 }
 
 function getUserName(user?: DashboardUser): string {
-  if (!user) return "—";
-  return user.name ?? ([user.firstName, user.lastName].filter(Boolean).join(" ") || user.email);
+  return formatUserName(user);
 }
 
 export default function StaffDashboardPage() {

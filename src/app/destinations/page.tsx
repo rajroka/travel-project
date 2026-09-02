@@ -302,10 +302,12 @@ function DestinationsContent() {
                             {d.name}
                           </h3>
                           <div className="mt-2 flex items-center gap-1.5">
-                            <Stars rating={d.averageRating > 0 ? d.averageRating : 4} />
-                            <span className="text-sm text-gray-500">
-                              {d.totalReviews > 0 ? d.totalReviews : 3} reviews
-                            </span>
+                            <Stars rating={d.averageRating > 0 ? d.averageRating : 0} />
+                            {d.averageRating > 0 && (
+                              <span className="text-sm text-gray-500">
+                                {d.totalReviews} {d.totalReviews === 1 ? 'review' : 'reviews'}
+                              </span>
+                            )}
                           </div>
                           <div className="mt-2 flex items-center gap-1.5 text-sm text-gray-600">
                             <MapPinIcon size={14} className="flex-shrink-0 text-gray-500" />

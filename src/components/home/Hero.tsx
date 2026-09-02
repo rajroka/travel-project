@@ -64,7 +64,7 @@ export default function Hero() {
           </div>
           <button
             type="submit"
-            className="m-1.5 rounded-full bg-teal-500 px-7 py-3 text-sm font-bold text-white transition hover:bg-teal-600"
+            className="m-1.5 rounded-full bg-blue-600 px-7 py-3 text-sm font-bold text-white transition hover:bg-blue-700"
           >
             Search
           </button>

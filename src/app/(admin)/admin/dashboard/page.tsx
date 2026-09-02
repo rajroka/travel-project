@@ -14,6 +14,7 @@ import {
   BarChartIcon,
   Analytics01Icon,
 } from "hugeicons-react";
+import { formatUserName } from "@/lib/utils/formatters";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -59,8 +60,7 @@ const STATUS_STYLES: Record<string, string> = {
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 function getUserName(u: { name?: string; firstName?: string; lastName?: string; email: string }): string {
-  if (u?.name) return u.name;
-  return [u?.firstName, u?.lastName].filter(Boolean).join(" ") || u?.email || "—";
+  return formatUserName(u);
 }
 
 // ─── Chart components (pure SVG, zero deps) ─────────────────────────────────

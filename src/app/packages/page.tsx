@@ -16,6 +16,14 @@ import {
   ArrowRight01Icon,
 } from "hugeicons-react";
 
+const FALLBACK_IMAGES = [
+  "/pexels-tkirkgoz-4750098.jpg",
+  "/pexels-roman-saienko-1867764487-28831413.jpg",
+  "/pexels-mr-dr3igeteilt-2159455987-36564643.jpg",
+  "/gumba.jpg",
+  "/hero-image.jpg",
+];
+
 interface Package {
   _id: string;
   title: string;
@@ -124,13 +132,22 @@ function PackagesContent() {
       <div className="min-h-screen bg-gray-50">
 
         {/* ── Hero banner ─────────────────────────────────────────────── */}
-        <section className="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 py-16 text-white">
-          <div className="mx-auto max-w-6xl px-6 text-center">
-            <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-blue-300">
+        <section className="relative py-16 text-white overflow-hidden">
+          {/* Background image */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: 'url(/gumba.jpg)' }}
+          />
+          {/* Light dark overlay */}
+          <div className="absolute inset-0 bg-black/30" />
+          
+          {/* Content */}
+          <div className="relative mx-auto max-w-6xl px-6 text-center">
+            <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-white">
               Curated Experiences
             </p>
             <h1 className="text-4xl font-extrabold md:text-5xl">Tour Packages</h1>
-            <p className="mx-auto mt-4 max-w-2xl text-blue-200">
+            <p className="mx-auto mt-4 max-w-2xl text-white">
               Handcrafted itineraries across Nepal — from Everest treks to jungle safaris.
               Find your perfect adventure.
             </p>
@@ -146,7 +163,7 @@ function PackagesContent() {
                   className="h-12 w-full rounded-xl border-0 pl-11 pr-4 text-sm text-gray-800 shadow-lg outline-none focus:ring-2 focus:ring-blue-400"
                 />
               </div>
-              <button type="submit" className="rounded-xl bg-blue-500 px-6 text-sm font-semibold text-white shadow-lg transition hover:bg-blue-600">
+              <button type="submit" className="rounded-xl bg-teal-500 px-6 text-sm font-semibold text-white shadow-lg transition hover:bg-teal-600">
                 Search
               </button>
             </form>
@@ -284,7 +301,11 @@ function PackagesContent() {
                 </div>
               ) : (
                 <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                  {packages.map((pkg) => (
+                  {packages.map((pkg, index) => {
+                    const isRealPhoto = pkg.coverImage && !pkg.coverImage.includes("Nepal.png") && !pkg.coverImage.includes("nepal.png");
+                    const photo = isRealPhoto ? pkg.coverImage! : FALLBACK_IMAGES[index % FALLBACK_IMAGES.length];
+                    
+                    return (
                     <Link
                       key={pkg._id}
                       href={`/packages/${pkg.slug}`}
@@ -292,13 +313,7 @@ function PackagesContent() {
                     >
                       {/* Image */}
                       <div className="relative h-48 bg-gray-100">
-                        {pkg.coverImage ? (
-                          <Image src={pkg.coverImage} alt={pkg.title} fill className="object-cover transition group-hover:scale-105" sizes="(max-width:640px) 100vw, 33vw" />
-                        ) : (
-                          <div className="flex h-full items-center justify-center">
-                            <Location01Icon size={48} className="text-green-300" />
-                          </div>
-                        )}
+                        <Image src={photo} alt={pkg.title} fill className="object-cover transition group-hover:scale-105" sizes="(max-width:640px) 100vw, 33vw" />
                         {pkg.isPromotional && (
                           <span className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-red-500 px-2.5 py-1 text-xs font-bold text-white">
                             <Tag01Icon size={11} /> SALE
@@ -312,27 +327,27 @@ function PackagesContent() {
                       </div>
 
                       {/* Body */}
-                      <div className="p-5">
-                        <h3 className="line-clamp-2 font-semibold text-gray-900 leading-snug">{pkg.title}</h3>
+                      <div className="p-5 min-w-0">
+                        <h3 className="break-words overflow-hidden line-clamp-2 font-semibold text-gray-900 leading-snug">{pkg.title}</h3>
 
                         {pkg.destination && (
-                          <p className="mt-1.5 flex items-center gap-1.5 text-sm text-gray-400">
-                            <Location01Icon size={13} className="text-blue-400" />
-                            {pkg.destination.name}
+                          <p className="mt-1.5 flex items-center gap-1.5 text-sm text-gray-400 min-w-0">
+                            <Location01Icon size={13} className="flex-shrink-0 text-blue-400" />
+                            <span className="truncate">{pkg.destination.name}</span>
                           </p>
                         )}
 
-                        <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
-                          <span className="flex items-center gap-1.5">
+                        <div className="mt-3 flex items-center flex-wrap gap-4 text-xs text-gray-500">
+                          <span className="flex items-center gap-1.5 flex-shrink-0">
                             <Clock01Icon size={13} className="text-blue-400" />
                             {pkg.duration.days}D / {pkg.duration.nights}N
                           </span>
-                          <span className="flex items-center gap-1.5">
+                          <span className="flex items-center gap-1.5 flex-shrink-0">
                             <UserGroupIcon size={13} className="text-blue-400" />
                             Max {pkg.maxTravelers}
                           </span>
                           {pkg.averageRating > 0 && (
-                            <span className="flex items-center gap-1 text-amber-500">
+                            <span className="flex items-center gap-1 text-amber-500 flex-shrink-0">
                               <FaStar size={11} />
                               {pkg.averageRating.toFixed(1)}
                               <span className="text-gray-400">({pkg.totalReviews})</span>
@@ -359,7 +374,8 @@ function PackagesContent() {
                         </div>
                       </div>
                     </Link>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
 

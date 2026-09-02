@@ -34,13 +34,15 @@ export const updateBookingStatusSchema = z.object({
 
 export const bookingQuerySchema = z.object({
   page: z.coerce.number().min(1).default(1),
-  limit: z.coerce.number().min(1).max(100).default(10),
+  limit: z.coerce.number().min(1).max(10000).default(10),
   status: z.enum({ pending: "pending", confirmed: "confirmed", completed: "completed", cancelled: "cancelled" }).optional(),
   paymentStatus: z.enum({ unpaid: "unpaid", partial: "partial", paid: "paid", refunded: "refunded" }).optional(),
+  packageId: z.string().optional(),
+  destinationId: z.string().optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
   search: z.string().optional(),
-  sort: z.enum({ newest: "newest", oldest: "oldest", travel_date: "travel_date" }).default("newest"),
+  sort: z.enum({ newest: "newest", oldest: "oldest", travel_date: "travel_date", amount_high: "amount_high", amount_low: "amount_low" }).default("newest"),
 });
 
 export type CreateBookingInput = z.infer<typeof createBookingSchema>;
