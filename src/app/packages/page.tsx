@@ -153,17 +153,17 @@ function PackagesContent() {
             </p>
 
             {/* Search bar */}
-            <form onSubmit={handleSearch} className="mx-auto mt-8 flex max-w-xl gap-3">
+            <form onSubmit={handleSearch} className="mx-auto mt-8 flex max-w-xl overflow-hidden rounded-xl bg-white shadow-lg">
               <div className="relative flex-1">
                 <Search01Icon size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search packages…"
-                  className="h-12 w-full rounded-xl border-0 pl-11 pr-4 text-sm text-gray-800 shadow-lg outline-none focus:ring-2 focus:ring-blue-400"
+                  className="h-12 w-full bg-white pl-11 pr-4 text-sm text-gray-800 outline-none placeholder:text-gray-400"
                 />
               </div>
-              <button type="submit" className="rounded-xl bg-teal-500 px-6 text-sm font-semibold text-white shadow-lg transition hover:bg-teal-600">
+              <button type="submit" className="bg-blue-600 px-6 text-sm font-semibold text-white transition hover:bg-blue-700">
                 Search
               </button>
             </form>

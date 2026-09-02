@@ -121,34 +121,35 @@ function DestinationsContent() {
     <div className="min-h-screen bg-gray-50">
 
       {/* ── Hero ─────────────────────────────────────────────────────── */}
-      <section className="relative h-64 overflow-hidden bg-blue-900 sm:h-72">
+      <section className="relative h-64 overflow-hidden sm:h-72">
         <Image
           src="https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=1600&q=80"
           alt="Nepal destinations"
           fill
-          className="object-cover opacity-40"
+          className="object-cover"
           sizes="100vw"
           priority
         />
-        <div className="relative flex h-full flex-col items-center justify-center px-6 text-center">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-blue-300">Explore Nepal</p>
+        <div className="absolute inset-0 bg-black/40" />
+        <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
+          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-white/80">Explore Nepal</p>
           <h1 className="text-4xl font-extrabold text-white sm:text-5xl">Destinations</h1>
-          <p className="mt-3 max-w-lg text-blue-200">
+          <p className="mt-3 max-w-lg text-white/85">
             From the world&apos;s highest peaks to lush jungles — discover Nepal&apos;s most breathtaking places.
           </p>
 
           {/* Search bar */}
-          <form onSubmit={handleSearch} className="mx-auto mt-6 flex w-full max-w-lg gap-2">
+          <form onSubmit={handleSearch} className="mx-auto mt-6 flex w-full max-w-lg overflow-hidden rounded-xl bg-white shadow-lg">
             <div className="relative flex-1">
               <Search01Icon size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 value={searchInput}
                 onChange={e => setSearchInput(e.target.value)}
                 placeholder="Search destinations…"
-                className="h-11 w-full rounded-xl border-0 pl-10 pr-4 text-sm text-gray-900 shadow-lg outline-none focus:ring-2 focus:ring-blue-400"
+                className="h-11 w-full bg-white pl-10 pr-4 text-sm text-gray-900 outline-none placeholder:text-gray-400"
               />
             </div>
-            <button type="submit" className="rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white shadow-lg transition hover:bg-blue-700">
+            <button type="submit" className="bg-blue-600 px-5 text-sm font-semibold text-white transition hover:bg-blue-700">
               Search
             </button>
           </form>

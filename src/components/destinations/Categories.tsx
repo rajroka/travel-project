@@ -54,7 +54,7 @@ export default function Categories() {
                 className="object-cover transition duration-500 group-hover:scale-110"
                 sizes="(max-width: 640px) 100vw, 25vw"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+              <div className="absolute inset-0 bg-black/35" />
               <div className="absolute bottom-0 left-0 p-6">
                 <h3 className="text-2xl font-bold text-white">{category.title}</h3>
                 <p className="mt-1 text-sm text-white/80">{category.description}</p>

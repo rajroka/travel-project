@@ -195,12 +195,12 @@ export default function DestinationDetailPage() {
 
         {/* Hero — full cover image, no side gaps */}
         <div className="mb-8 overflow-hidden rounded-2xl shadow-sm">
-          <div className="relative h-64 w-full bg-gradient-to-br from-blue-100 to-indigo-200 sm:h-80">
+          <div className="relative h-64 w-full bg-gray-200 sm:h-80">
             {dest.coverImage
               ? <Image src={dest.coverImage} alt={dest.name} fill className="object-cover" sizes="100vw" priority />
-              : <div className="flex h-full items-center justify-center"><MapPinIcon size={52} className="text-blue-200" /></div>
+              : <div className="flex h-full items-center justify-center"><MapPinIcon size={52} className="text-gray-400" /></div>
             }
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+            <div className="absolute inset-0 bg-black/35" />
             <div className="absolute bottom-0 left-0 right-0 p-6">
               {dest.isFeatured && <span className="mb-2 inline-block rounded-full bg-yellow-400 px-3 py-1 text-xs font-bold text-white">Featured</span>}
               <h1 className="text-2xl font-bold text-white line-clamp-2 sm:text-3xl">{dest.name}</h1>
