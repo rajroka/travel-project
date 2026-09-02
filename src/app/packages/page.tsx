@@ -300,76 +300,63 @@ function PackagesContent() {
                   </button>
                 </div>
               ) : (
-                <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
                   {packages.map((pkg, index) => {
                     const isRealPhoto = pkg.coverImage && !pkg.coverImage.includes("Nepal.png") && !pkg.coverImage.includes("nepal.png");
                     const photo = isRealPhoto ? pkg.coverImage! : FALLBACK_IMAGES[index % FALLBACK_IMAGES.length];
+                    const displayPrice = pkg.discountPrice ?? pkg.price;
                     
                     return (
                     <Link
                       key={pkg._id}
                       href={`/packages/${pkg.slug}`}
-                      className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+                      className="group overflow-hidden rounded-2xl bg-white shadow-sm transition hover:shadow-lg"
                     >
-                      {/* Image */}
-                      <div className="relative h-48 bg-gray-100">
-                        <Image src={photo} alt={pkg.title} fill className="object-cover transition group-hover:scale-105" sizes="(max-width:640px) 100vw, 33vw" />
+                      {/* Image - Square aspect ratio */}
+                      <div className="relative aspect-square overflow-hidden bg-gray-100">
+                        <Image 
+                          src={photo} 
+                          alt={pkg.title} 
+                          fill 
+                          className="object-cover transition duration-500 group-hover:scale-105" 
+                          sizes="(max-width:640px) 100vw, (max-width:1280px) 50vw, 33vw" 
+                        />
                         {pkg.isPromotional && (
-                          <span className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-red-500 px-2.5 py-1 text-xs font-bold text-white">
+                          <span className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-red-500 px-2.5 py-1 text-xs font-bold text-white shadow-md">
                             <Tag01Icon size={11} /> SALE
-                          </span>
-                        )}
-                        {pkg.difficultyLevel && (
-                          <span className="absolute right-3 top-3 rounded-full bg-black/50 px-2.5 py-1 text-xs font-medium capitalize text-white">
-                            {pkg.difficultyLevel}
                           </span>
                         )}
                       </div>
 
-                      {/* Body */}
-                      <div className="p-5 min-w-0">
-                        <h3 className="break-words overflow-hidden line-clamp-2 font-semibold text-gray-900 leading-snug">{pkg.title}</h3>
+                      {/* Content */}
+                      <div className="p-5">
+                        {/* Title */}
+                        <h3 className="break-words text-lg font-bold leading-tight text-gray-900 line-clamp-2 mb-3">
+                          {pkg.title}
+                        </h3>
 
-                        {pkg.destination && (
-                          <p className="mt-1.5 flex items-center gap-1.5 text-sm text-gray-400 min-w-0">
-                            <Location01Icon size={13} className="flex-shrink-0 text-blue-400" />
-                            <span className="truncate">{pkg.destination.name}</span>
-                          </p>
-                        )}
-
-                        <div className="mt-3 flex items-center flex-wrap gap-4 text-xs text-gray-500">
-                          <span className="flex items-center gap-1.5 flex-shrink-0">
-                            <Clock01Icon size={13} className="text-blue-400" />
-                            {pkg.duration.days}D / {pkg.duration.nights}N
-                          </span>
-                          <span className="flex items-center gap-1.5 flex-shrink-0">
-                            <UserGroupIcon size={13} className="text-blue-400" />
-                            Max {pkg.maxTravelers}
-                          </span>
-                          {pkg.averageRating > 0 && (
-                            <span className="flex items-center gap-1 text-amber-500 flex-shrink-0">
-                              <FaStar size={11} />
-                              {pkg.averageRating.toFixed(1)}
-                              <span className="text-gray-400">({pkg.totalReviews})</span>
-                            </span>
-                          )}
+                        {/* Stars */}
+                        <div className="mb-3 flex items-center gap-1">
+                          {[1, 2, 3, 4, 5].map(i => (
+                            <FaStar
+                              key={i}
+                              size={16}
+                              className={i <= Math.round(pkg.averageRating) ? "text-gray-300" : "text-gray-200"}
+                            />
+                          ))}
                         </div>
 
-                        {/* Footer */}
-                        <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-4">
-                          <div>
-                            {pkg.discountPrice ? (
-                              <>
-                                <span className="text-xl font-bold text-blue-700">${pkg.discountPrice}</span>
-                                <span className="ml-1.5 text-xs text-gray-400 line-through">${pkg.price}</span>
-                              </>
-                            ) : (
-                              <span className="text-xl font-bold text-blue-700">${pkg.price}</span>
-                            )}
-                            <span className="text-xs text-gray-400"> / person</span>
-                          </div>
-                          <span className="flex items-center gap-1 rounded-xl bg-blue-700 px-3 py-1.5 text-xs font-semibold text-white group-hover:bg-blue-800 transition">
-                            View <ArrowRight01Icon size={13} />
+                        {/* Duration */}
+                        <div className="mb-2 flex items-center gap-2 text-base text-gray-600">
+                          <Clock01Icon size={18} className="flex-shrink-0 text-gray-400" />
+                          <span>Duration: {pkg.duration.days} days</span>
+                        </div>
+
+                        {/* Price */}
+                        <div className="flex items-center gap-2 text-base text-gray-600">
+                          <span className="text-gray-600">$</span>
+                          <span className="font-normal">
+                            Starting From: <span className="font-semibold text-gray-900">USD {displayPrice.toLocaleString()}</span>
                           </span>
                         </div>
                       </div>

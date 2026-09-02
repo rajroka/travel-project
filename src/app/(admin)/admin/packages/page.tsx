@@ -1,17 +1,16 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import Image from "next/image";
 import {
   PackageIcon,
-  Delete01Icon,
-  PencilEdit01Icon,
   Add01Icon,
   Cancel01Icon,
   FloppyDiskIcon,
 } from "hugeicons-react";
-import { FaStar } from "react-icons/fa";
 import ImageUpload from "@/components/ui/ImageUpload";
+import PackageManageCard, {
+  PackageManageCardSkeleton,
+} from "@/components/packages/PackageManageCard";
 
 interface Destination { _id: string; name: string; slug: string }
 
@@ -330,7 +329,7 @@ export default function AdminPackagesPage() {
       {loading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-52 animate-pulse rounded-2xl bg-gray-100" />
+            <PackageManageCardSkeleton key={i} />
           ))}
         </div>
       ) : packages.length === 0 ? (
@@ -340,71 +339,16 @@ export default function AdminPackagesPage() {
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {packages.map(p => (
-            <div
+          {packages.map((p, i) => (
+            <PackageManageCard
               key={p._id}
-              className={`overflow-hidden rounded-2xl border bg-white shadow-sm transition ${!p.isActive ? "opacity-60" : "border-gray-100"}`}
-            >
-              <div className="relative h-40 bg-gradient-to-br from-green-100 to-teal-200">
-                {p.coverImage ? (
-                  <Image src={p.coverImage} alt={p.title} fill className="object-cover" sizes="33vw" />
-                ) : (
-                  <div className="flex h-full items-center justify-center">
-                    <PackageIcon size={40} className="text-green-300" />
-                  </div>
-                )}
-                {!p.isActive && (
-                  <span className="absolute left-2 top-2 rounded-full bg-gray-700/80 px-2 py-0.5 text-xs text-white">Inactive</span>
-                )}
-                {p.isPromotional && (
-                  <span className="absolute right-2 top-2 rounded-full bg-red-500 px-2 py-0.5 text-xs font-semibold text-white">Sale</span>
-                )}
-              </div>
-              <div className="p-4">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <h3 className="truncate font-semibold text-gray-900">{p.title}</h3>
-                    <p className="text-xs text-gray-400">
-                      {p.duration.days}D / {p.duration.nights}N ·{" "}
-                      <span className="font-medium text-gray-700">
-                        ${p.discountPrice ?? p.price}
-                        {p.discountPrice && <span className="ml-1 line-through text-gray-400">${p.price}</span>}
-                      </span>
-                    </p>
-                    {p.averageRating > 0 && (
-                      <span className="mt-1 flex items-center gap-1 text-xs text-gray-500">
-                        <FaStar size={10} className="text-amber-400" /> {p.averageRating.toFixed(1)} · {p.totalBookings} bookings
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex flex-shrink-0 gap-1">
-                    <button
-                      onClick={() => toggleActive(p)}
-                      className={`rounded-lg px-2 py-1 text-xs font-semibold transition ${
-                        p.isActive
-                          ? "bg-red-50 text-red-600 hover:bg-red-100"
-                          : "bg-green-50 text-green-700 hover:bg-green-100"
-                      }`}
-                    >
-                      {p.isActive ? "Deactivate" : "Activate"}
-                    </button>
-                    <button
-                      onClick={() => openEdit(p)}
-                      className="rounded-lg p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition"
-                    >
-                      <PencilEdit01Icon size={15} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(p.slug)}
-                      disabled={deleting === p.slug}
-                      className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 transition disabled:opacity-40"
-                    >
-                      <Delete01Icon size={15} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+              pkg={p}
+              index={i}
+              deleting={deleting === p.slug}
+              onEdit={() => openEdit(p)}
+              onDelete={() => handleDelete(p.slug)}
+              onToggleActive={() => toggleActive(p)}
+            />
           ))}
         </div>
       )}
